@@ -1,0 +1,14 @@
+/* Google dibuja el botón adentro de este div; acá solo se reserva el lugar para que no salte al cargar. */
+.button {
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  justify-content: center;
+  color-scheme: light; /* el iframe de Google se ve mal con el esquema oscuro de la página */
+}
+
+.unavailable {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+}

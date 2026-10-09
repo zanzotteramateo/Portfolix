@@ -1,0 +1,72 @@
+/*
+ * Las variables de color del tema. Los componentes no usan colores sueltos: solo estas variables.
+ * - Claro: es el default, como en las preferencias del backend (theme LIGHT). Lo propuso la 11D: Figma no tiene tema claro.
+ * - Oscuro: los colores del diseño de Figma (variables "bg/base" → --bg-base, etc.). Se activa con data-theme="dark"
+ *   en <html>, que pone ThemeSync según la preferencia del usuario.
+ */
+
+/* Tipografías y medidas: no cambian con el tema. */
+:root {
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+
+  --radius: 6px;
+  --radius-lg: 12px;
+}
+
+:root {
+  color-scheme: light; /* los controles nativos (calendario, listas, barras) siguen el tema */
+
+  --bg-base: #f4f6f9;
+  --surface-1: #ffffff;
+  --surface-2: #eef2f7;
+  --border-subtle: #e5e9f0;
+  --border-default: #d0d7e2;
+  --text-primary: #1f2328;
+  --text-muted: #59636e;
+  --accent: #0969da;
+  --status-gain: #1a7f37;
+  --status-loss: #cf222e;
+
+  /* Derivados: no son variables de Figma. */
+  --accent-strong: #1f6feb; /* fondo de los botones principales: con texto blanco se lee bien */
+  --accent-strong-hover: #1158c7;
+  --danger-strong: #cf222e; /* fondo de los botones de borrar y de vender */
+  --avatar-from: #8250df; /* el degradado del avatar va de este violeta a --accent-strong */
+  --status-warning: #9a6700; /* fuerza de contraseña intermedia */
+  --loss-soft: rgb(207 34 46 / 0.08);
+  --gain-soft: rgb(26 127 55 / 0.1);
+  --accent-soft: rgb(9 105 218 / 0.1);
+  --row-hover: rgb(31 35 40 / 0.04);
+  --shadow-lg: 0 12px 32px rgb(31 35 40 / 0.18); /* menús y tarjetas flotantes */
+  --shadow-xl: 0 24px 64px rgb(31 35 40 / 0.25); /* modales */
+  --overlay: rgb(31 35 40 / 0.35); /* el fondo de los modales */
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg-base: #0d1117;
+  --surface-1: #161b22;
+  --surface-2: #1c2333;
+  --border-subtle: #21262d;
+  --border-default: #30363d;
+  --text-primary: #e6edf3;
+  --text-muted: #7d8590;
+  --accent: #58a6ff;
+  --status-gain: #3fb950;
+  --status-loss: #f85149;
+
+  --accent-strong: #1f6feb;
+  --accent-strong-hover: #388bfd;
+  --danger-strong: #da3633;
+  --avatar-from: #8957e5;
+  --status-warning: #d29922;
+  --loss-soft: rgb(248 81 73 / 0.1);
+  --gain-soft: rgb(63 185 80 / 0.12);
+  --accent-soft: rgb(56 139 253 / 0.15);
+  --row-hover: rgb(177 186 196 / 0.04);
+  --shadow-lg: 0 12px 32px rgb(1 4 9 / 0.6);
+  --shadow-xl: 0 24px 64px rgb(1 4 9 / 0.7);
+  --overlay: rgb(1 4 9 / 0.65);
+}

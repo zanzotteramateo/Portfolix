@@ -1,0 +1,130 @@
+spring:
+  application:
+    name: portfolix-backend
+  config:
+    # Precios y dólar fijos, para portfolix.market.provider=fixed (lo usan los tests).
+    import: classpath:market/fixed-prices.yml
+  http:
+    clients:
+      # Una API externa lenta no puede colgar los requests de la app.
+      connect-timeout: 3s
+      read-timeout: 10s # el histórico de Data912 pesa ~600 KB y tarda 2–4 s
+  # Sin perfil por defecto (fase 10B): esta configuración base es la de producción. El perfil dev, que trae
+  # valores de desarrollo (entre ellos una clave JWT commiteada), se activa solo con ./mvnw spring-boot:run
+  # (plugin de Maven) y en los tests. Así, un servidor al que le falta configuración no arranca, en vez de
+  # arrancar en dev.
+  datasource:
+    # Sin defaults: fuera de dev son obligatorias (en dev apuntan al Postgres de compose.yaml).
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  web:
+    locale: es
+    locale-resolver: fixed
+  mvc:
+    format:
+      # Fechas en parámetros de URL en ISO (?from=2026-09-25), sin depender del idioma fijado arriba.
+      date: iso
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  mail:
+    # SMTP del proveedor de mails. Sin default: fuera de dev es obligatorio (en dev es Mailpit).
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      # La conexión con el proveedor va cifrada (STARTTLS); si no se puede cifrar, no se manda.
+      mail.smtp.starttls.enable: true
+      mail.smtp.starttls.required: true
+      # Un SMTP colgado no puede dejar hilos esperando para siempre (milisegundos).
+      mail.smtp.connectiontimeout: 5000
+      mail.smtp.timeout: 10000
+      mail.smtp.writetimeout: 10000
+
+management:
+  health:
+    mail:
+      # Si el SMTP no responde, la app sigue funcionando (el mail se puede reenviar): no la marca como caída.
+      enabled: false
+
+portfolix:
+  # Zona horaria para decidir qué día es "hoy" (ej.: fecha de una transacción no futura).
+  business-time-zone: America/Argentina/Buenos_Aires
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:}
+  jwt:
+    # Clave HS256 en Base64 (mínimo 32 bytes). Sin default: fuera de dev es obligatoria.
+    secret: ${JWT_SECRET:}
+    issuer: portfolix-api
+    access-token-ttl: 15m
+  mail:
+    # Remitente, ej.: "Portfolix <no-reply@tudominio.com>". Sin default: fuera de dev es obligatorio.
+    from: ${MAIL_FROM:}
+    # URL del front. Los links de los mails abren sus páginas (ej.: /verify-email), que llaman a la API.
+    frontend-url: ${FRONTEND_URL:}
+  auth:
+    refresh-token:
+      remember-me-ttl: 30d
+      session-ttl: 1d
+      cookie-name: portfolix_refresh
+      cookie-secure: true
+    # Tokens de un solo uso que viajan en los links de los mails.
+    email-token:
+      verification-ttl: 24h
+      password-reset-ttl: 1h
+      email-change-ttl: 24h
+      # Tiempo mínimo entre dos mails del mismo tipo a una cuenta (botón "Reenviar").
+      resend-cooldown: 60s
+    # Bloqueo por intentos fallidos, por mail (exista o no la cuenta). Si pasa lock-duration
+    # sin errores nuevos, el contador vuelve a cero.
+    login-lockout:
+      max-attempts: 5
+      lock-duration: 5m
+    # "Continuar con Google". El Client ID (Google Cloud, OAuth tipo "Aplicación web") no es secreto:
+    # el front lo usa en el botón. Sin él, el login con Google responde 503 y el resto funciona igual.
+    google:
+      client-id: ${GOOGLE_CLIENT_ID:}
+      # Claves públicas con las que Google firma los ID tokens. Las rota seguido: se bajan y se cachean.
+      jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
+  # Pedidos por IP a los endpoints de auth (ver RateLimitPolicy). Cada límite es un balde de "capacity"
+  # fichas que se recarga de a poco y se llena de nuevo en "period"; cada pedido usa una ficha.
+  rate-limit:
+    enabled: true
+    limits:
+      login:
+        capacity: 10
+        period: 1m
+      email:
+        capacity: 10
+        period: 1h
+      token:
+        capacity: 20
+        period: 1m
+  market:
+    # live: APIs reales. fixed: valores de market/fixed-prices.yml, sin internet (los tests usan fixed).
+    provider: live
+    # Dólar para convertir entre ARS y USD: OFICIAL, MEP, CCL o BLUE. Se usa el valor de venta.
+    fx-type: BLUE
+    # Cada cuánto se piden valores nuevos. Mientras tanto (y si la API falla) se usa el último conocido.
+    refresh:
+      prices: 5m
+      fx: 15m
+      fx-history: 12h
+      crypto-day-history: 5m    # velas de 15 min (gráfico de 24 h)
+      crypto-week-history: 15m  # velas de 1 h (gráfico de 7 días)
+      daily-closes: 6h          # cierres diarios de BYMA: cambian una vez por día
+    sources:
+      dolar-api: https://dolarapi.com
+      argentina-datos: https://api.argentinadatos.com
+      binance: https://api.binance.com
+      data912: https://data912.com
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html

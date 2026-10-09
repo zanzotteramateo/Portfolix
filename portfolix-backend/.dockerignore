@@ -1,0 +1,7 @@
+# Lo que no hace falta mandarle a Docker para construir la imagen (el build compila desde src/).
+target/
+.vscode/
+.idea/
+.github/
+*.md
+compose.yaml

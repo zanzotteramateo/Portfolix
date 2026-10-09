@@ -1,0 +1,172 @@
+/* Estilos que comparten las pantallas de auth (lo que no es un componente propio). */
+
+.title {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Error de un campo que no es un TextField (ej.: la casilla de los términos). */
+.fieldError {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--status-loss);
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.footer {
+  margin-top: 8px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* Ayuda debajo de un campo (ej.: "¿Es tuya? Iniciá sesión…" si el mail ya tiene cuenta). */
+.fieldHint {
+  margin-top: -6px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.formError {
+  font-size: 12px;
+  color: var(--status-loss);
+  text-align: center;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+/* Botón que se ve como link (acciones que no navegan, ej.: "Cambiar correo electrónico"). */
+.linkButton {
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 13px;
+}
+
+.linkButton:hover {
+  text-decoration: underline;
+}
+
+.separator {
+  height: 1px;
+  background: var(--border-default);
+  border: none;
+  margin: 4px 0;
+}
+
+/* Pantallas de resultado (éxito o enlace inválido): ícono grande centrado, título y texto. */
+.result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.resultIcon {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--gain-soft);
+  color: var(--status-gain);
+}
+
+.resultIcon.error {
+  background: var(--loss-soft);
+  color: var(--status-loss);
+}
+
+.resultIcon.pending {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.resultTitle {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.resultText {
+  color: var(--text-muted);
+}
+
+/* Pasos numerados de "Revisá tu correo". */
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--bg-base);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  font-size: 13px;
+}
+
+.steps li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stepNumber {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.email {
+  color: var(--text-primary);
+  font-weight: 600;
+  word-break: break-all;
+}

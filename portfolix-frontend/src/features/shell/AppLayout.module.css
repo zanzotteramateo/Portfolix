@@ -1,0 +1,132 @@
+.layout {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  height: 100%;
+}
+
+.topbar {
+  display: none;
+}
+
+.overlay {
+  display: none;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-base);
+  border-right: 1px solid var(--border-subtle);
+  min-height: 0;
+}
+
+.brand {
+  padding: 20px 18px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 10px 6px;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.navItem:hover {
+  background: var(--surface-1);
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.navItem.active {
+  background: var(--accent-soft);
+  color: var(--text-primary);
+}
+
+.navItem.active svg {
+  color: var(--accent);
+}
+
+.content {
+  overflow: auto;
+  padding: 24px 28px;
+}
+
+/* Debajo de 860px el menú lateral pasa a ser un cajón: la barra superior (con la hamburguesa) queda fija
+   arriba de todo y el sidebar se desliza por encima del contenido en vez de ocupar una columna. */
+@media (max-width: 860px) {
+  .layout {
+    display: block;
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    height: 56px;
+    padding: 0 16px;
+    background: var(--bg-base);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .menuButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    background: none;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius);
+    color: var(--text-primary);
+  }
+
+  .overlay {
+    display: block;
+    position: fixed;
+    top: 56px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 15;
+    background: var(--overlay);
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 56px;
+    left: 0;
+    bottom: 0;
+    z-index: 16;
+    width: 250px;
+    max-width: 82vw;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+    box-shadow: var(--shadow-xl);
+  }
+
+  .sidebarOpen {
+    transform: translateX(0);
+  }
+
+  .content {
+    height: 100%;
+    padding-top: 80px;
+  }
+}

@@ -1,0 +1,24 @@
+# Fly.io: el front (fase 12). Ver los pasos en el CLAUDE del backend (sección "Deploy en Fly.io").
+# Reemplazar TU-DOMINIO y el Client ID de producción antes del primer deploy. Los valores de [build.args] se fijan
+# en el build (son públicos: el navegador los ve igual).
+
+app = "portfolix-web"
+primary_region = "gru"
+
+[build]
+  dockerfile = "Dockerfile"
+
+  [build.args]
+    VITE_API_URL = "https://api.TU-DOMINIO/api/v1"
+    VITE_GOOGLE_CLIENT_ID = "CLIENT-ID-DE-PRODUCCION.apps.googleusercontent.com"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"

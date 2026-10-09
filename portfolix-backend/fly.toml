@@ -1,0 +1,42 @@
+# Fly.io: la API (fase 12). Ver los pasos en el CLAUDE del backend (sección "Deploy en Fly.io").
+# Los valores de acá no son secretos. Los secretos van con `fly secrets set` (JWT_SECRET, DB_PASSWORD, MAIL_PASSWORD…).
+# Reemplazar TU-DOMINIO por el dominio comprado antes del primer deploy.
+
+app = "portfolix-api"
+# gru = São Paulo, la región más cercana a Argentina. Confirmar que esté disponible en el plan elegido.
+primary_region = "gru"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  DB_PORT = "5432"
+  MAIL_HOST = "smtp-relay.brevo.com"
+  MAIL_PORT = "587"
+  # Fly pone la IP real del cliente en X-Forwarded-For. Sin esto, el rate limit por IP vería solo el proxy.
+  SERVER_FORWARD_HEADERS_STRATEGY = "native"
+  FRONTEND_URL = "https://app.TU-DOMINIO"
+  CORS_ALLOWED_ORIGINS = "https://app.TU-DOMINIO"
+  MAIL_FROM = "no-reply@TU-DOMINIO"
+  # El Client ID de producción (público). Sin él, el login con Google responde 503.
+  GOOGLE_CLIENT_ID = "CLIENT-ID-DE-PRODUCCION.apps.googleusercontent.com"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  # Una sola instancia, siempre prendida: el rate limit y el bloqueo de login viven en memoria.
+  auto_stop_machines = "off"
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    grace_period = "30s"
+    interval = "15s"
+    method = "GET"
+    path = "/actuator/health"
+    timeout = "5s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  # La imagen se probó en local con 512 MB (ver fase 10B).
+  memory = "512mb"

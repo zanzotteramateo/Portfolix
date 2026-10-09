@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{mail/layout :: layout(~{::content})}">
+<body>
+<div th:fragment="content">
+    <p style="margin: 0 0 16px;">Hola, <span th:text="${name}">Juan Pérez</span>:</p>
+    <p style="margin: 0 0 24px;">
+        Pediste usar este correo para tu cuenta de Portfolix. Para confirmar el cambio:
+    </p>
+    <p style="margin: 0 0 24px;">
+        <a th:href="${link}" href="#"
+           style="display: inline-block; padding: 12px 24px; background-color: #2563eb; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: bold;">
+            Confirmar mi nuevo correo
+        </a>
+    </p>
+    <p style="margin: 0 0 16px;">
+        El link vence en <span th:text="${validity}">24 horas</span>.
+        Hasta que lo confirmes, seguís entrando con tu correo actual.
+    </p>
+    <p style="margin: 0 0 16px; font-size: 13px; color: #6b7280;">
+        Si el botón no funciona, copiá este link en tu navegador:<br>
+        <a th:href="${link}" th:text="${link}" href="#" style="color: #2563eb; word-break: break-all;">link</a>
+    </p>
+    <p style="margin: 0; font-size: 13px; color: #6b7280;">
+        Si no lo pediste, ignorá este mail: el correo de la cuenta no cambia.
+    </p>
+</div>
+</body>
+</html>

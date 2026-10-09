@@ -1,0 +1,210 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  padding: 4px 10px 12px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: none;
+  border: none;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.sectionHeader svg {
+  transition: transform 0.15s;
+}
+
+.chevronCollapsed {
+  transform: rotate(-90deg);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.empty {
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.item {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.link {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 7px 34px 7px 10px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.link:hover {
+  background: var(--surface-1);
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.link.active {
+  background: var(--accent-soft);
+  color: var(--text-primary);
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--border-default);
+}
+
+.active .dot {
+  background: var(--accent);
+}
+
+.name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* El "⋯" aparece al pasar el mouse (o con el teclado), y queda visible en el portafolio abierto. */
+.more {
+  position: absolute;
+  right: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: var(--text-muted);
+  opacity: 0;
+}
+
+.item:hover .more,
+.more:focus-visible,
+.moreVisible {
+  opacity: 1;
+}
+
+.more:hover {
+  background: var(--surface-2);
+  color: var(--text-primary);
+}
+
+.createButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: auto;
+  padding: 9px;
+  background: none;
+  border: 1px dashed var(--border-default);
+  border-radius: var(--radius);
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.createButton:hover {
+  border-color: var(--text-muted);
+  color: var(--text-primary);
+}
+
+.actionError {
+  margin: 6px 10px;
+  font-size: 12px;
+  color: var(--status-loss);
+}
+
+/* Formulario de nombre en el lugar (crear y renombrar). */
+.nameForm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  margin: 2px 0;
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+}
+
+.nameInput {
+  height: 32px;
+  padding: 0 10px;
+  background: var(--bg-base);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  outline: none;
+  font-size: 13px;
+}
+
+.nameInputInvalid {
+  border-color: var(--status-loss);
+}
+
+.nameError {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--status-loss);
+}
+
+.nameActions {
+  display: flex;
+  gap: 6px;
+}
+
+.saveButton,
+.cancelButton {
+  flex: 1;
+  height: 28px;
+  border-radius: var(--radius);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.saveButton {
+  background: var(--accent-strong);
+  border: none;
+  color: #fff;
+}
+
+.cancelButton {
+  background: none;
+  border: 1px solid var(--border-default);
+  color: var(--text-muted);
+}
+
+.nameHint {
+  font-size: 11px;
+  color: var(--text-muted);
+}

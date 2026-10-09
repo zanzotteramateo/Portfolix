@@ -1,0 +1,82 @@
+.user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 12px 14px 16px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* El botón del perfil: el avatar, el nombre y el mail. Abre el menú de la cuenta. */
+.profile {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 4px;
+  background: none;
+  border: none;
+  border-radius: var(--radius);
+  text-align: left;
+  color: var(--text-primary);
+}
+
+.profile:hover,
+.profile:focus-visible {
+  background: var(--surface-1);
+  outline: none;
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--avatar-from), var(--accent-strong));
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.userText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.userName {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.userEmail {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+}
+
+.iconButton:hover {
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}

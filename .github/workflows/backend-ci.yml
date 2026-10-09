@@ -1,0 +1,142 @@
+# CI del backend: compila y corre toda la suite (con Postgres real vía Testcontainers) en cada push a main
+# y en cada PR que toque portfolix-backend/, y comprueba que la imagen Docker arranque con la configuración
+# de producción. En main, además, le manda a GitHub el árbol de dependencias resuelto, para que las alertas
+# de seguridad de Dependabot vean las versiones reales.
+name: Backend CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'portfolix-backend/**'
+      - '.github/workflows/backend-ci.yml'
+  pull_request:
+    paths:
+      - 'portfolix-backend/**'
+      - '.github/workflows/backend-ci.yml'
+  workflow_dispatch: # para correrlo a mano desde la pestaña Actions
+
+# Solo lectura por defecto: el único job que escribe pide su permiso.
+permissions:
+  contents: read
+
+# Si llega otro push a la misma rama mientras corre, se cancela la corrida vieja.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: portfolix-backend
+
+jobs:
+  test:
+    name: Tests
+    # Linux: los runners de Windows no corren contenedores de Linux, y Testcontainers los necesita.
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+          cache-dependency-path: portfolix-backend/pom.xml
+
+      # -B: sin colores ni animaciones; -ntp: sin el progreso de cada descarga (el log queda legible).
+      # verify corre los tests y además empaqueta el jar.
+      - name: Compilar y correr los tests
+        run: ./mvnw -B -ntp verify
+
+      - name: Subir los reportes de los tests
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: surefire-reports
+          path: portfolix-backend/target/surefire-reports/
+          retention-days: 7
+
+  image:
+    name: Imagen Docker
+    # Lo que los tests no ven: que la imagen se construya y que la app arranque con la configuración de
+    # producción (sin perfil). Falla si aparece una variable obligatoria nueva, si una migración no corre
+    # sobre una base vacía o si se rompe el Dockerfile.
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: portfolix
+          POSTGRES_USER: portfolix
+          POSTGRES_PASSWORD: portfolix
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U portfolix"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Construir la imagen
+        run: docker build -t portfolix-backend .
+
+      # --network host: la app ve al Postgres del servicio en localhost:5432.
+      # El SMTP no se contacta al arrancar, así que alcanza con un host cualquiera.
+      - name: Arrancarla con la configuración de producción
+        run: |
+          docker run -d --name api --network host --memory 512m \
+            -e DB_HOST=localhost -e DB_NAME=portfolix -e DB_USERNAME=portfolix -e DB_PASSWORD=portfolix \
+            -e JWT_SECRET="$(openssl rand -base64 32)" \
+            -e MAIL_HOST=localhost -e MAIL_FROM=ci@portfolix.test -e FRONTEND_URL=http://localhost:5173 \
+            portfolix-backend
+
+      - name: Esperar a que /actuator/health diga UP
+        run: |
+          for _ in $(seq 1 60); do
+            if curl -fsS http://localhost:8080/actuator/health 2>/dev/null | grep -q '"status":"UP"'; then
+              echo "La app arrancó y se conectó a la base"
+              exit 0
+            fi
+            if [ "$(docker inspect -f '{{.State.Running}}' api)" != "true" ]; then
+              echo "La app se cerró al arrancar (ver los logs en el paso siguiente)"
+              exit 1
+            fi
+            sleep 2
+          done
+          echo "La app no respondió UP en 2 minutos"
+          exit 1
+
+      - name: Logs de la app
+        if: always()
+        run: docker logs api
+
+  dependency-graph:
+    name: Grafo de dependencias
+    # Spring Boot fija la mayoría de las versiones desde el pom padre: leyendo solo nuestro pom.xml, GitHub no sabe
+    # qué versión de Tomcat o Jackson se usa ni ve las dependencias transitivas. Este job resuelve el árbol completo
+    # con Maven y se lo manda. Solo en main, que es la rama que miran las alertas.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write # la API de dependency submission lo exige
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+          cache-dependency-path: portfolix-backend/pom.xml
+
+      - uses: advanced-security/maven-dependency-submission-action@v6
+        with:
+          # Ruta absoluta: con una relativa, la action entra a la carpeta y después busca el mvnw
+          # con la misma ruta relativa (portfolix-backend/portfolix-backend/mvnw).
+          directory: ${{ github.workspace }}/portfolix-backend

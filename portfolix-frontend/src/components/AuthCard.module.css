@@ -1,0 +1,92 @@
+.page {
+  position: relative;
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+  overflow: hidden;
+}
+
+/* Los dos brillos de fondo del diseño: azul arriba al centro, verde abajo a la derecha. */
+.glowBlue,
+.glowGreen {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+}
+
+.glowBlue {
+  width: 700px;
+  height: 700px;
+  top: -12%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgb(31 111 235 / 0.16);
+}
+
+.glowGreen {
+  width: 400px;
+  height: 400px;
+  bottom: -10%;
+  right: 12%;
+  background: rgb(63 185 80 / 0.1);
+}
+
+.card {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  padding: 40px 36px 36px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.tagline {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.introIcon {
+  width: 44px;
+  height: 44px;
+  margin-bottom: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.description {
+  color: var(--text-muted);
+  line-height: 1.45;
+}

@@ -1,0 +1,47 @@
+/* Un popover se centra en la pantalla por defecto: se lo saca de ahí y se lo ubica con top/left (Menu.tsx). */
+.menu {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  min-width: 220px;
+  padding: 6px;
+  background: var(--surface-2);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  box-shadow: var(--shadow-lg);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  background: none;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 13px;
+  text-align: left;
+  color: var(--text-primary);
+}
+
+.item svg {
+  color: var(--text-muted);
+}
+
+.item:hover,
+.item:focus-visible {
+  background: var(--accent-soft);
+  outline: none;
+}
+
+.danger,
+.danger svg {
+  color: var(--status-loss);
+}
+
+.danger:hover,
+.danger:focus-visible {
+  background: var(--loss-soft);
+}

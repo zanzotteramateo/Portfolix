@@ -1,0 +1,53 @@
+# CI del front: lint, chequeo de tipos y build en cada push a main y en cada PR que toque portfolix-frontend/.
+# (Sin tests unitarios: decisión de la fase 11. Los end-to-end llegan en la 11D.)
+name: Frontend CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'portfolix-frontend/**'
+      - '.github/workflows/frontend-ci.yml'
+  pull_request:
+    paths:
+      - 'portfolix-frontend/**'
+      - '.github/workflows/frontend-ci.yml'
+  workflow_dispatch: # para correrlo a mano desde la pestaña Actions
+
+permissions:
+  contents: read
+
+# Si llega otro push a la misma rama mientras corre, se cancela la corrida vieja.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: portfolix-frontend
+
+jobs:
+  build:
+    name: Lint y build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: portfolix-frontend/package-lock.json
+
+      # npm ci instala exactamente lo del package-lock.json (y falla si no coincide con el package.json).
+      - name: Instalar dependencias
+        run: npm ci
+
+      # En el CI los avisos también fallan: así el código queda sin avisos pendientes.
+      - name: Lint
+        run: npm run lint -- --deny-warnings
+
+      # tsc -b (chequeo de tipos) + vite build.
+      - name: Build
+        run: npm run build

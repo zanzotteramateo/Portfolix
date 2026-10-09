@@ -1,0 +1,27 @@
+# Dependabot solo para seguridad (decisión de la fase 10A).
+#
+# open-pull-requests-limit: 0 apaga las PRs de versiones nuevas. No afecta a las PRs de seguridad, que tienen
+# su propio límite: llegan cuando hay una alerta, siempre que en la configuración del repo estén prendidas
+# "Dependabot alerts" y "Dependabot security updates".
+# Para recibir también las versiones nuevas, subir el límite (ej.: 5).
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: /portfolix-backend
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+
+  # El front (fase 11). GitHub lee el package-lock.json completo (con las transitivas): no hace falta
+  # mandarle el árbol como al backend.
+  - package-ecosystem: npm
+    directory: /portfolix-frontend
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0

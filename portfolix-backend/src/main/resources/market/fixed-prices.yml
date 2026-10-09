@@ -1,0 +1,70 @@
+# Precios fijos para portfolix.market.provider=fixed (tests y desarrollo sin internet). Se pueden editar a mano.
+# Acciones y CEDEARs en ARS, cripto en USD (la moneda de cada activo en el catálogo).
+# Cada activo del catálogo tiene que tener precio: lo verifica FixedMarketDataTest.
+portfolix:
+  market:
+    fixed:
+      # Pesos por dólar. Sin histórico: se usa el mismo valor para todas las fechas.
+      usd-rate: 1400
+      prices:
+        # Acciones argentinas (ARS)
+        GGAL: 6200
+        YPFD: 42000
+        PAMP: 3050
+        BMA: 9800
+        BBAR: 6500
+        SUPV: 2600
+        VALO: 350
+        BYMA: 320
+        TXAR: 780
+        ALUA: 850
+        CEPU: 1550
+        EDN: 1650
+        TRAN: 2300
+        TGSU2: 6900
+        TECO2: 2700
+        LOMA: 2300
+        CRES: 1450
+        COME: 95
+        MIRG: 21000
+        # CEDEARs (ARS)
+        AAPL: 12160
+        MSFT: 13260
+        GOOGL: 10420
+        AMZN: 10620
+        NVDA: 28825
+        TSLA: 5834
+        META: 36000
+        MELI: 85470
+        NFLX: 23000
+        AMD: 11500
+        INTC: 3200
+        KO: 18500
+        MCD: 14800
+        WMT: 9100
+        DISN: 12300
+        JPM: 17600
+        V: 21400
+        BRKB: 25300
+        XOM: 16900
+        PFE: 5400
+        BABA: 8700
+        GLOB: 9600
+        VIST: 23500
+        SPY: 41000
+        QQQ: 24500
+        # Criptomonedas (USD)
+        BTC: 112000
+        ETH: 4200
+        USDT: 1
+        USDC: 1
+        SOL: 210
+        ADA: 0.82
+        BNB: 980
+        XRP: 2.9
+        DOGE: 0.24
+        DOT: 4.1
+        AVAX: 30
+        LINK: 22
+        LTC: 110
+        POL: 0.27

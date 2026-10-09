@@ -1,0 +1,2 @@
+-- Migración inicial vacía: solo verifica que Flyway esté funcionando.
+-- Las tablas del dominio se agregan en migraciones posteriores (V2, V3, ...).

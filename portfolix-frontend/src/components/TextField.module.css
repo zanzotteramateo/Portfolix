@@ -1,0 +1,85 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 41px;
+  background: var(--bg-base);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.control:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.control.invalid {
+  border-color: var(--status-loss);
+}
+
+.control.invalid:focus-within {
+  box-shadow: 0 0 0 3px var(--loss-soft);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 14px;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+/* El foco ya se ve en el borde del control. */
+.input:focus-visible {
+  outline: none;
+}
+
+.toggle {
+  display: inline-flex;
+  padding: 0 14px 0 6px;
+  height: 100%;
+  align-items: center;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+}
+
+.toggle:hover {
+  color: var(--text-primary);
+}
+
+.error {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 15px;
+  color: var(--status-loss);
+}
+
+.error svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}

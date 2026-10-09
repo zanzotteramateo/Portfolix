@@ -1,0 +1,16 @@
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background: var(--bg-base);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+}
+
+.iconButton:hover,
+.iconButton[aria-pressed='true'] {
+  color: var(--text-primary);
+}

@@ -1,0 +1,104 @@
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ---- Tipo (chips), como en el dashboard ---- */
+
+.chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  height: 30px;
+  padding: 0 14px;
+  background: none;
+  border: 1px solid var(--border-default);
+  border-radius: 15px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.chip:hover {
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+
+.chipActive {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+  color: #fff;
+}
+
+.chipActive:hover {
+  color: #fff;
+  border-color: var(--accent-strong);
+}
+
+/* ---- Portafolio, activo y fechas ---- */
+
+.fields {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 160px;
+}
+
+.label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.select {
+  height: 34px;
+  padding: 0 10px;
+  background: var(--bg-base);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 13px;
+}
+
+.select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.invalid {
+  border-color: var(--status-loss);
+}
+
+.error {
+  margin: 0;
+  font-size: 12px;
+  color: var(--status-loss);
+}
+
+.clear {
+  align-self: center;
+  padding: 0;
+  background: none;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.clear:hover {
+  text-decoration: underline;
+}

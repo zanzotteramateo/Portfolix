@@ -1,0 +1,51 @@
+.segmented {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  background: var(--bg-base);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius);
+}
+
+.option {
+  flex: 1;
+  padding: 0 12px;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.option:hover {
+  color: var(--text-primary);
+}
+
+.small .option {
+  height: 26px;
+  font-size: 11px;
+}
+
+.large {
+  display: flex;
+}
+
+.large .option {
+  height: 32px;
+  font-size: 13px;
+}
+
+.active {
+  background: var(--accent-strong);
+  color: #fff;
+}
+
+.gain {
+  background: var(--gain-soft);
+  color: var(--status-gain);
+}
+
+.loss {
+  background: var(--loss-soft);
+  color: var(--status-loss);
+}

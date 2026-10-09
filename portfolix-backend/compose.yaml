@@ -1,0 +1,27 @@
+services:
+  postgres:
+    image: 'postgres:17'
+    environment:
+      - 'POSTGRES_DB=portfolix'
+      - 'POSTGRES_USER=portfolix'
+      - 'POSTGRES_PASSWORD=portfolix'
+    ports:
+      - '5432:5432'
+    volumes:
+      - 'postgres-data:/var/lib/postgresql/data'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U portfolix -d portfolix']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Servidor SMTP de prueba: recibe los mails de la app sin mandarlos de verdad.
+  # Bandeja de entrada en http://localhost:8025
+  mailpit:
+    image: 'axllent/mailpit:v1'
+    ports:
+      - '1025:1025' # SMTP
+      - '8025:8025' # web
+
+volumes:
+  postgres-data:

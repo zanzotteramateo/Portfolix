@@ -1,0 +1,63 @@
+/* Lo que comparten los diálogos de la cuenta (contraseña, mail, eliminar) y el de ajustes. */
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.text {
+  margin: 0 0 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.text strong {
+  color: var(--text-primary);
+}
+
+.list {
+  margin: 0 0 14px;
+  padding-left: 18px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-muted);
+}
+
+.list strong {
+  color: var(--text-primary);
+}
+
+.hint {
+  margin: 0 0 14px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.linkButton {
+  padding: 0;
+  background: none;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.linkButton:hover {
+  text-decoration: underline;
+}
+
+.danger {
+  background: var(--danger-strong);
+  color: #fff;
+}
+
+.danger:hover:not(:disabled) {
+  background: var(--status-loss);
+}
+
+/* Un bloque debajo de los campos (los requisitos, un link). */
+.block {
+  margin-top: 14px;
+}
