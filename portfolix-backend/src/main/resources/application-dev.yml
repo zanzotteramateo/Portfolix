@@ -2,6 +2,11 @@
 # y los tests (src/test/resources/config/application.properties). Desde el IDE, agregarlo a la
 # configuración de ejecución (ej.: variable de entorno SPRING_PROFILES_ACTIVE=dev).
 spring:
+  main:
+    # application.yml lo prende para producción (arrancar más rápido con poca CPU); en dev y en los
+    # tests no hace falta, y además PortfolixBackendApplicationTests necesita que el precargado de
+    # precios (ApplicationReadyEvent) corra siempre, no recién cuando algo lo pide.
+    lazy-initialization: false
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:portfolix}
     username: ${DB_USERNAME:portfolix}

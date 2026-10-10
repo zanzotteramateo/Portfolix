@@ -1,6 +1,12 @@
 spring:
   application:
     name: portfolix-backend
+  # Crea los beans de a uno, cuando se piden, no todos al arrancar. En un plan gratis con poca CPU
+  # (ej.: Render) esto es la diferencia entre que Tomcat abra el puerto en segundos o en minutos: crear
+  # ~200 beans con reflection es lo que más tarda, y ese trabajo se puede diferir hasta el primer pedido
+  # real. application-dev.yml lo desactiva, así que en desarrollo y en los tests sigue como siempre.
+  main:
+    lazy-initialization: true
   config:
     # Precios y dólar fijos, para portfolix.market.provider=fixed (lo usan los tests).
     import: classpath:market/fixed-prices.yml
