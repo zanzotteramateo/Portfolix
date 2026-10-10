@@ -133,7 +133,10 @@ portfolix:
     sources:
       dolar-api: https://dolarapi.com
       argentina-datos: https://api.argentinadatos.com
-      binance: https://api.binance.com
+      # No Binance: le niega el acceso a su API a pedidos desde regiones como EE.UU. (ej.: Render,
+      # región Virginia) por motivos regulatorios. CoinGecko es un agregador de precios, no un
+      # exchange, y no tiene esa restricción. API pública, sin clave.
+      coin-gecko: https://api.coingecko.com/api/v3
       data912: https://data912.com
 
 springdoc:

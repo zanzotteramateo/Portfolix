@@ -18,8 +18,8 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.NavigableMap;
@@ -28,7 +28,7 @@ import java.util.TreeMap;
 import java.util.concurrent.Executor;
 
 /**
- * Historial de precios real: velas de Binance para cripto y cierres diarios de Data912 para BYMA.
+ * Historial de precios real: CoinGecko para cripto y cierres diarios de Data912 para BYMA.
  * Mismo esquema de caché que LiveMarketData (último valor conocido, refresco en segundo plano).
  */
 @Component
@@ -43,37 +43,37 @@ class LiveMarketHistory implements PriceHistoryProvider {
     private record DailyKey(AssetType type, String symbol) {
     }
 
-    private final BinanceClient binance;
+    private final CoinGeckoClient coinGecko;
     private final Data912Client data912;
     private final PriceProvider priceProvider;
     private final BusinessCalendar calendar;
     private final Clock clock;
 
-    /** Cripto, por símbolo: 96 velas de 15 min (24 h) y 168 velas de 1 h (7 días). */
+    /** Cripto, por símbolo: ~día (CoinGecko ajusta solo la densidad) y 7 días. */
     private final LoadingCache<String, List<PricePoint>> cryptoDay;
     private final LoadingCache<String, List<PricePoint>> cryptoWeek;
     /** BYMA: cierres diarios de los últimos días. */
     private final LoadingCache<DailyKey, NavigableMap<LocalDate, BigDecimal>> dailyCloses;
 
     @Autowired
-    LiveMarketHistory(BinanceClient binance, Data912Client data912, PriceProvider priceProvider,
+    LiveMarketHistory(CoinGeckoClient coinGecko, Data912Client data912, PriceProvider priceProvider,
                       BusinessCalendar calendar, MarketProperties properties, Clock clock,
                       @Qualifier("marketExecutor") Executor marketExecutor) {
-        this(binance, data912, priceProvider, calendar, properties, clock, Ticker.systemTicker(), marketExecutor);
+        this(coinGecko, data912, priceProvider, calendar, properties, clock, Ticker.systemTicker(), marketExecutor);
     }
 
-    LiveMarketHistory(BinanceClient binance, Data912Client data912, PriceProvider priceProvider,
+    LiveMarketHistory(CoinGeckoClient coinGecko, Data912Client data912, PriceProvider priceProvider,
                       BusinessCalendar calendar, MarketProperties properties, Clock clock,
                       Ticker ticker, Executor executor) {
-        this.binance = binance;
+        this.coinGecko = coinGecko;
         this.data912 = data912;
         this.priceProvider = priceProvider;
         this.calendar = calendar;
         this.clock = clock;
 
         MarketProperties.Refresh refresh = properties.refresh();
-        this.cryptoDay = cache(refresh.cryptoDayHistory(), ticker, executor, symbol -> fetchKlines(symbol, "15m", 96));
-        this.cryptoWeek = cache(refresh.cryptoWeekHistory(), ticker, executor, symbol -> fetchKlines(symbol, "1h", 168));
+        this.cryptoDay = cache(refresh.cryptoDayHistory(), ticker, executor, symbol -> fetchMarketChart(symbol, 1));
+        this.cryptoWeek = cache(refresh.cryptoWeekHistory(), ticker, executor, symbol -> fetchMarketChart(symbol, 7));
         this.dailyCloses = cache(refresh.dailyCloses(), ticker, executor, this::fetchDailyCloses);
     }
 
@@ -123,19 +123,17 @@ class LiveMarketHistory implements PriceHistoryProvider {
         return Optional.ofNullable(value);
     }
 
-    private List<PricePoint> fetchKlines(String symbol, String interval, int limit) {
+    private List<PricePoint> fetchMarketChart(String symbol, int days) {
         if (symbol.equals(USDT)) {
-            return List.of(new PricePoint(clock.instant(), BigDecimal.ONE)); // USDT es la unidad de Binance
+            return List.of(new PricePoint(clock.instant(), BigDecimal.ONE)); // fijo, igual que en LiveMarketData
         }
-        List<BinanceClient.Kline> klines = binance.klines(symbol + USDT, interval, limit);
-        if (klines.isEmpty()) {
-            throw new IllegalStateException("Binance no devolvió velas para " + symbol);
+        List<List<BigDecimal>> rows = coinGecko.marketChart(CoinGeckoIds.of(symbol), days);
+        if (rows.isEmpty()) {
+            throw new IllegalStateException("CoinGecko no devolvió historial para " + symbol);
         }
-        // Primer punto: la apertura de la primera vela (el precio al inicio del rango); después, cada cierre.
-        List<PricePoint> points = new ArrayList<>(klines.size() + 1);
-        points.add(new PricePoint(klines.getFirst().openTime(), klines.getFirst().open()));
-        klines.forEach(kline -> points.add(new PricePoint(kline.closeTime(), kline.close())));
-        return points;
+        return rows.stream()
+                .map(row -> new PricePoint(Instant.ofEpochMilli(row.get(0).longValueExact()), row.get(1)))
+                .toList();
     }
 
     private NavigableMap<LocalDate, BigDecimal> fetchDailyCloses(DailyKey key) {

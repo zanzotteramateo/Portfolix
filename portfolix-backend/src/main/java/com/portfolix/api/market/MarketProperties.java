@@ -48,7 +48,7 @@ public record MarketProperties(
     public record Sources(
             @NotBlank String dolarApi,
             @NotBlank String argentinaDatos,
-            @NotBlank String binance,
+            @NotBlank String coinGecko,
             @NotBlank String data912
     ) {
     }

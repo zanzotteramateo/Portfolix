@@ -40,7 +40,7 @@ class LiveMarketDataTest {
 
     private final DolarApiClient dolarApi = mock(DolarApiClient.class);
     private final ArgentinaDatosClient argentinaDatos = mock(ArgentinaDatosClient.class);
-    private final BinanceClient binance = mock(BinanceClient.class);
+    private final CoinGeckoClient coinGecko = mock(CoinGeckoClient.class);
     private final Data912Client data912 = mock(Data912Client.class);
     private final AssetService assetService = mock(AssetService.class);
     private final AtomicLong nanos = new AtomicLong();
@@ -62,26 +62,25 @@ class LiveMarketDataTest {
                         Duration.ofMinutes(5), Duration.ofMinutes(15), Duration.ofHours(6)),
                 new MarketProperties.Sources("https://a.test", "https://b.test", "https://c.test", "https://d.test"),
                 new MarketProperties.Fixed(BigDecimal.ONE, Map.of()));
-        market = new LiveMarketData(dolarApi, argentinaDatos, binance, data912, assetService, properties,
+        market = new LiveMarketData(dolarApi, argentinaDatos, coinGecko, data912, assetService, properties,
                 Clock.fixed(NOW, ZoneOffset.UTC), nanos::get, Runnable::run);
         when(assetService.symbolsOfType(AssetType.CRYPTO)).thenReturn(List.of("BTC", "ETH", "USDT"));
     }
 
     @Test
-    void stocksAndCedearsComeFromData912_andCryptoFromBinance() {
+    void stocksAndCedearsComeFromData912_andCryptoFromCoinGecko() {
         when(data912.stocks()).thenReturn(List.of(stock("GGAL", "6005", "-4.53")));
         when(data912.cedears()).thenReturn(List.of(stock("AAPL", "27400", "0.5")));
-        when(binance.tickers24h(anyCollection())).thenReturn(List.of(
-                new BinanceClient.Ticker("BTCUSDT", new BigDecimal("83615.28"), new BigDecimal("-0.5")),
-                new BinanceClient.Ticker("ETHUSDT", new BigDecimal("2693.46"), new BigDecimal("1.2"))));
+        when(coinGecko.prices(anyCollection())).thenReturn(Map.of(
+                "bitcoin", new CoinGeckoClient.PriceEntry(new BigDecimal("83615.28"), new BigDecimal("-0.5")),
+                "ethereum", new CoinGeckoClient.PriceEntry(new BigDecimal("2693.46"), new BigDecimal("1.2"))));
 
         assertThat(market.quote(ggal)).isEqualTo(new PriceQuote(new BigDecimal("6005"), new BigDecimal("-4.53"), NOW));
         assertThat(market.quote(aapl).price()).isEqualByComparingTo("27400");
         assertThat(market.quote(btc).price()).isEqualByComparingTo("83615.28");
-        // USDT es la unidad de Binance: vale 1 y no se pide (no existe el par USDTUSDT).
+        // USDT se fija en 1 sin pedírselo a CoinGecko (si no, un "stablecoin" se movería unos centavos).
         assertThat(market.quote(usdt).price()).isEqualByComparingTo("1");
-        verify(binance).tickers24h(argThat(pairs -> pairs.containsAll(List.of("BTCUSDT", "ETHUSDT"))
-                && !pairs.contains("USDTUSDT")));
+        verify(coinGecko).prices(argThat(ids -> ids.containsAll(List.of("bitcoin", "ethereum")) && !ids.contains("tether")));
     }
 
     @Test

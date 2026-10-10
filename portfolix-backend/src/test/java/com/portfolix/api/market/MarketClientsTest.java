@@ -35,7 +35,7 @@ class MarketClientsTest {
             new MarketProperties.Refresh(Duration.ofMinutes(5), Duration.ofMinutes(15), Duration.ofHours(12),
                     Duration.ofMinutes(5), Duration.ofMinutes(15), Duration.ofHours(6)),
             new MarketProperties.Sources("https://dolarapi.test", "https://argentinadatos.test",
-                    "https://binance.test", "https://data912.test"),
+                    "https://coingecko.test", "https://data912.test"),
             new MarketProperties.Fixed(BigDecimal.ONE, Map.of()));
 
     @Test
@@ -74,27 +74,25 @@ class MarketClientsTest {
     }
 
     @Test
-    void binance_asksForAllPairsInOneRequest() {
+    void coinGecko_asksForAllCoinsInOneRequest() {
         RestClient.Builder builder = RestClient.builder();
         MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
         server.expect(request -> {
-                    String rawQuery = request.getURI().getRawQuery();
-                    assertThat(request.getURI().getPath()).isEqualTo("/api/v3/ticker/24hr");
-                    assertThat(rawQuery).doesNotContain("\"", "["); // viajan codificados
-                    assertThat(URLDecoder.decode(rawQuery, StandardCharsets.UTF_8))
-                            .isEqualTo("symbols=[\"BTCUSDT\",\"ETHUSDT\"]");
+                    assertThat(request.getURI().getPath()).isEqualTo("/simple/price");
+                    assertThat(URLDecoder.decode(request.getURI().getRawQuery(), StandardCharsets.UTF_8))
+                            .isEqualTo("ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true");
                 })
                 .andRespond(withSuccess("""
-                        [{"symbol":"BTCUSDT","priceChange":"-420.1","priceChangePercent":"-0.500",
-                          "lastPrice":"83615.28000000","volume":"1234.5"},
-                         {"symbol":"ETHUSDT","priceChangePercent":"1.200","lastPrice":"2693.46000000"}]
+                        {"bitcoin":{"usd":83615.28,"usd_24h_change":-0.5},
+                         "ethereum":{"usd":2693.46,"usd_24h_change":1.2}}
                         """, MediaType.APPLICATION_JSON));
 
-        List<BinanceClient.Ticker> tickers = new BinanceClient(builder, PROPERTIES).tickers24h(List.of("BTCUSDT", "ETHUSDT"));
+        Map<String, CoinGeckoClient.PriceEntry> prices =
+                new CoinGeckoClient(builder, PROPERTIES).prices(List.of("bitcoin", "ethereum"));
 
-        assertThat(tickers).extracting(BinanceClient.Ticker::symbol).containsExactly("BTCUSDT", "ETHUSDT");
-        assertThat(tickers.getFirst().lastPrice()).isEqualByComparingTo("83615.28");
-        assertThat(tickers.getFirst().priceChangePercent()).isEqualByComparingTo("-0.5");
+        assertThat(prices.get("bitcoin").usd()).isEqualByComparingTo("83615.28");
+        assertThat(prices.get("bitcoin").usd24hChange()).isEqualByComparingTo("-0.5");
+        assertThat(prices.get("ethereum").usd()).isEqualByComparingTo("2693.46");
         server.verify();
     }
 
@@ -120,20 +118,20 @@ class MarketClientsTest {
     }
 
     @Test
-    void binance_readsKlinesThatComeAsListsWithoutNames() {
+    void coinGecko_readsMarketChartPoints() {
         RestClient.Builder builder = RestClient.builder();
         MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
-        server.expect(requestTo("https://binance.test/api/v3/klines?symbol=BTCUSDT&interval=1h&limit=168"))
+        server.expect(requestTo("https://coingecko.test/coins/bitcoin/market_chart?vs_currency=usd&days=7"))
                 .andRespond(withSuccess("""
-                        [[1790708400000,"83594.01000000","83626.62000000","83508.00000000","83624.93000000",
-                          "12.34",1790711999999,"1031234.5",1234,"6.1","510000.1","0"]]
+                        {"prices":[[1790708400000,83594.01],[1790712000000,83624.93]]}
                         """, MediaType.APPLICATION_JSON));
 
-        List<BinanceClient.Kline> klines = new BinanceClient(builder, PROPERTIES).klines("BTCUSDT", "1h", 168);
+        List<List<BigDecimal>> points = new CoinGeckoClient(builder, PROPERTIES).marketChart("bitcoin", 7);
 
-        assertThat(klines).containsExactly(new BinanceClient.Kline(
-                Instant.ofEpochMilli(1790708400000L), new BigDecimal("83594.01000000"),
-                new BigDecimal("83624.93000000"), Instant.ofEpochMilli(1790711999999L)));
+        assertThat(points).hasSize(2);
+        assertThat(points.get(0).get(0)).isEqualByComparingTo("1790708400000");
+        assertThat(points.get(0).get(1)).isEqualByComparingTo("83594.01");
+        assertThat(points.get(1).get(1)).isEqualByComparingTo("83624.93");
     }
 
     @Test

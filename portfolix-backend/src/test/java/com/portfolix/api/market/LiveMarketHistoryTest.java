@@ -37,7 +37,7 @@ class LiveMarketHistoryTest {
 
     private static final Instant NOW = Instant.parse("2026-10-02T15:00:00Z"); // viernes, 12 h en Buenos Aires
 
-    private final BinanceClient binance = mock(BinanceClient.class);
+    private final CoinGeckoClient coinGecko = mock(CoinGeckoClient.class);
     private final Data912Client data912 = mock(Data912Client.class);
     private final PriceProvider priceProvider = mock(PriceProvider.class);
 
@@ -59,7 +59,7 @@ class LiveMarketHistoryTest {
                 new MarketProperties.Fixed(BigDecimal.ONE, Map.of()));
         BusinessCalendar calendar = new BusinessCalendar(clock, ZoneId.of("America/Argentina/Buenos_Aires"));
         AtomicLong nanos = new AtomicLong();
-        history = new LiveMarketHistory(binance, data912, priceProvider, calendar, properties, clock,
+        history = new LiveMarketHistory(coinGecko, data912, priceProvider, calendar, properties, clock,
                 nanos::get, Runnable::run);
         when(priceProvider.quote(ggal)).thenReturn(new PriceQuote(new BigDecimal("6100"), null, NOW));
     }
@@ -106,11 +106,9 @@ class LiveMarketHistoryTest {
     }
 
     @Test
-    void crypto_startsAtTheOpenOfTheFirstCandle_andFollowsEachClose() {
-        when(binance.klines("BTCUSDT", "1h", 168)).thenReturn(List.of(
-                kline("80000", "81000", 0),
-                kline("81000", "82000", 1),
-                kline("82000", "84000", 2)));
+    void crypto_readsPointsFromCoinGecko() {
+        when(coinGecko.marketChart("bitcoin", 7)).thenReturn(List.of(
+                point(0, "80000"), point(1, "81000"), point(2, "82000"), point(3, "84000")));
 
         PriceHistory week = history.history(btc, HistoryRange.WEEK);
 
@@ -121,17 +119,18 @@ class LiveMarketHistoryTest {
     }
 
     @Test
-    void usdt_isFlatAndNeverAsksBinance() {
+    void usdt_isFlatAndNeverAsksCoinGecko() {
         assertThat(history.history(usdt, HistoryRange.DAY).points().getFirst().price()).isEqualByComparingTo("1");
-        verify(binance, never()).klines(anyString(), anyString(), anyInt());
+        verify(coinGecko, never()).marketChart(anyString(), anyInt());
     }
 
     private static Data912Client.Candle candle(int month, int day, String close) {
         return new Data912Client.Candle(LocalDate.of(2026, month, day), new BigDecimal(close));
     }
 
-    private static BinanceClient.Kline kline(String open, String close, int hour) {
-        Instant openTime = Instant.parse("2026-09-25T00:00:00Z").plus(Duration.ofHours(hour));
-        return new BinanceClient.Kline(openTime, new BigDecimal(open), new BigDecimal(close), openTime.plus(Duration.ofHours(1)));
+    /** Un punto de {@code market_chart}: {@code [epochMillis, precio]}. */
+    private static List<BigDecimal> point(int hour, String price) {
+        Instant time = Instant.parse("2026-09-25T00:00:00Z").plus(Duration.ofHours(hour));
+        return List.of(BigDecimal.valueOf(time.toEpochMilli()), new BigDecimal(price));
     }
 }

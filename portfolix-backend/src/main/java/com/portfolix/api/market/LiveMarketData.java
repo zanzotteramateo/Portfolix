@@ -31,7 +31,7 @@ import java.util.TreeMap;
 import java.util.concurrent.Executor;
 
 /**
- * Precios y dólar reales: Data912 (acciones y CEDEARs), Binance (cripto), DolarApi (dólar actual)
+ * Precios y dólar reales: Data912 (acciones y CEDEARs), CoinGecko (cripto), DolarApi (dólar actual)
  * y ArgentinaDatos (dólar histórico).
  * <p>
  * Cada fuente se guarda en un caché de Caffeine en "modo refresco" ({@code refreshAfterWrite} sin vencimiento):
@@ -53,12 +53,11 @@ class LiveMarketData implements PriceProvider, FxRateProvider {
     private static final Logger log = LoggerFactory.getLogger(LiveMarketData.class);
     /** Clave única para los cachés que guardan un solo valor (el dólar actual, la serie histórica). */
     private static final String SINGLE = "current";
-    /** Binance cotiza todo contra USDT, así que USDT no tiene par propio: vale 1. */
     private static final String USDT = "USDT";
 
     private final DolarApiClient dolarApi;
     private final ArgentinaDatosClient argentinaDatos;
-    private final BinanceClient binance;
+    private final CoinGeckoClient coinGecko;
     private final Data912Client data912;
     private final AssetService assetService;
     private final FxRateType fxType;
@@ -69,20 +68,20 @@ class LiveMarketData implements PriceProvider, FxRateProvider {
     private final LoadingCache<String, NavigableMap<LocalDate, BigDecimal>> fxHistory;
 
     @Autowired
-    LiveMarketData(DolarApiClient dolarApi, ArgentinaDatosClient argentinaDatos, BinanceClient binance,
+    LiveMarketData(DolarApiClient dolarApi, ArgentinaDatosClient argentinaDatos, CoinGeckoClient coinGecko,
                    Data912Client data912, AssetService assetService, MarketProperties properties, Clock clock,
                    @Qualifier("marketExecutor") Executor marketExecutor) {
-        this(dolarApi, argentinaDatos, binance, data912, assetService, properties, clock,
+        this(dolarApi, argentinaDatos, coinGecko, data912, assetService, properties, clock,
                 Ticker.systemTicker(), marketExecutor);
     }
 
     /** Para tests: un reloj de Caffeine controlable y un executor que refresca en el mismo hilo. */
-    LiveMarketData(DolarApiClient dolarApi, ArgentinaDatosClient argentinaDatos, BinanceClient binance,
+    LiveMarketData(DolarApiClient dolarApi, ArgentinaDatosClient argentinaDatos, CoinGeckoClient coinGecko,
                    Data912Client data912, AssetService assetService, MarketProperties properties, Clock clock,
                    Ticker ticker, Executor executor) {
         this.dolarApi = dolarApi;
         this.argentinaDatos = argentinaDatos;
-        this.binance = binance;
+        this.coinGecko = coinGecko;
         this.data912 = data912;
         this.assetService = assetService;
         this.fxType = properties.fxType();
@@ -144,7 +143,7 @@ class LiveMarketData implements PriceProvider, FxRateProvider {
         return switch (type) {
             case STOCK -> fromData912(data912.stocks(), now);
             case CEDEAR -> fromData912(data912.cedears(), now);
-            case CRYPTO -> fromBinance(now);
+            case CRYPTO -> fromCoinGecko(now);
         };
     }
 
@@ -159,17 +158,28 @@ class LiveMarketData implements PriceProvider, FxRateProvider {
         return result;
     }
 
-    private Map<String, PriceQuote> fromBinance(Instant now) {
+    private Map<String, PriceQuote> fromCoinGecko(Instant now) {
         List<String> symbols = assetService.symbolsOfType(AssetType.CRYPTO);
         Map<String, PriceQuote> result = new HashMap<>();
+        // USDT es la moneda de referencia: se la fija en 1 en vez de pedirle a CoinGecko su precio real
+        // (que fluctúa centésimos), para no mostrar un "stablecoin" moviéndose todo el tiempo.
         if (symbols.contains(USDT)) {
             result.put(USDT, new PriceQuote(BigDecimal.ONE, BigDecimal.ZERO, now));
         }
-        List<String> pairs = symbols.stream().filter(symbol -> !symbol.equals(USDT)).map(symbol -> symbol + USDT).toList();
-        if (!pairs.isEmpty()) {
-            for (BinanceClient.Ticker ticker : binance.tickers24h(pairs)) {
-                String symbol = ticker.symbol().substring(0, ticker.symbol().length() - USDT.length());
-                result.put(symbol, new PriceQuote(ticker.lastPrice(), ticker.priceChangePercent(), now));
+        List<String> others = symbols.stream().filter(symbol -> !symbol.equals(USDT)).toList();
+        if (others.isEmpty()) {
+            return result;
+        }
+        Map<String, String> idsBySymbol = new HashMap<>();
+        for (String symbol : others) {
+            idsBySymbol.put(symbol, CoinGeckoIds.of(symbol));
+        }
+        Map<String, CoinGeckoClient.PriceEntry> byId = coinGecko.prices(idsBySymbol.values());
+        for (String symbol : others) {
+            CoinGeckoClient.PriceEntry entry = byId.get(idsBySymbol.get(symbol));
+            if (entry != null && entry.usd() != null) {
+                BigDecimal change = entry.usd24hChange() != null ? entry.usd24hChange() : BigDecimal.ZERO;
+                result.put(symbol, new PriceQuote(entry.usd(), change, now));
             }
         }
         return result;
