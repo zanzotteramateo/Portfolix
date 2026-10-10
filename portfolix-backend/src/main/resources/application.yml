@@ -68,6 +68,11 @@ portfolix:
     from: ${MAIL_FROM:}
     # URL del front. Los links de los mails abren sus páginas (ej.: /verify-email), que llaman a la API.
     frontend-url: ${FRONTEND_URL:}
+    # smtp: spring.mail.* (Mailpit en dev). brevo-api: la API HTTP de Brevo, para hostings gratis
+    # que bloquean los puertos SMTP (ej.: Render).
+    provider: ${MAIL_PROVIDER:smtp}
+    # Solo hace falta con provider=brevo-api.
+    brevo-api-key: ${BREVO_API_KEY:}
   auth:
     refresh-token:
       remember-me-ttl: 30d

@@ -11,6 +11,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -52,7 +53,15 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-                        .anyRequest().authenticated())
+                        // El resto de la API exige sesión; lo que no es /api (el front ya compilado que
+                        // sirve SpaWebConfig, cuando el deploy es de un solo origen) queda público: lo
+                        // que requiere login lo controla React mostrando el login, no el servidor.
+                        .requestMatchers("/api/**").authenticated()
+                        .anyRequest().permitAll())
+                // Lo exige el botón de Google en producción (ver la fase 8C): sin este header, en un
+                // origen que no sea localhost, Google Identity Services no manda las credenciales.
+                .headers(headers -> headers.referrerPolicy(
+                        referrer -> referrer.policy(ReferrerPolicy.NO_REFERRER_WHEN_DOWNGRADE)))
                 // Valida el JWT del header Authorization con el JwtDecoder de JwtConfig.
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(Customizer.withDefaults())

@@ -1,19 +1,14 @@
 package com.portfolix.api.common.mail;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.thymeleaf.ITemplateEngine;
 import org.thymeleaf.context.Context;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
 /**
@@ -22,8 +17,8 @@ import java.util.Locale;
  * {@link #send} no manda nada en el momento: publica el mail como evento, y {@link #deliver} lo recibe
  * recién cuando se confirma (commit) la transacción de quien lo pidió, en otro hilo. Así:
  * <ul>
- *   <li>el request no espera al servidor SMTP, que puede tardar segundos;</li>
- *   <li>si el SMTP falla, la operación (ej.: el registro) igual se completa, y el mail se puede reenviar;</li>
+ *   <li>el request no espera al servidor de mails, que puede tardar segundos;</li>
+ *   <li>si el envío falla, la operación (ej.: el registro) igual se completa, y el mail se puede reenviar;</li>
  *   <li>si la transacción se deshace (rollback), el mail no sale: nunca llega un link a un token que no existe;</li>
  *   <li>los flujos que no deben revelar si un mail tiene cuenta tardan lo mismo en los dos casos.</li>
  * </ul>
@@ -35,16 +30,13 @@ public class MailService {
     private static final Locale LOCALE = Locale.forLanguageTag("es-AR");
 
     private final ApplicationEventPublisher events;
-    private final JavaMailSender mailSender;
+    private final MailTransport transport;
     private final ITemplateEngine templateEngine;
-    private final MailProperties properties;
 
-    public MailService(ApplicationEventPublisher events, JavaMailSender mailSender,
-                       ITemplateEngine templateEngine, MailProperties properties) {
+    public MailService(ApplicationEventPublisher events, MailTransport transport, ITemplateEngine templateEngine) {
         this.events = events;
-        this.mailSender = mailSender;
+        this.transport = transport;
         this.templateEngine = templateEngine;
-        this.properties = properties;
     }
 
     /** Encola el mail: sale cuando se confirma la transacción actual (o enseguida, si no hay una). */
@@ -53,8 +45,9 @@ public class MailService {
     }
 
     /**
-     * Arma el mail con su plantilla y lo manda. No se llama directamente: Spring la invoca después
-     * del commit ({@code @TransactionalEventListener}) en un hilo de {@code mailExecutor} ({@code @Async}).
+     * Arma el mail con su plantilla y lo manda por {@link MailTransport} (SMTP o la API de Brevo, según
+     * {@code portfolix.mail.provider}). No se llama directamente: Spring la invoca después del commit
+     * ({@code @TransactionalEventListener}) en un hilo de {@code mailExecutor} ({@code @Async}).
      * {@code fallbackExecution}: sin esto, un mail pedido fuera de una transacción se descartaría sin aviso.
      * <p>
      * Como corre en otro hilo, un error no le llega a quien pidió el mail: se registra en el log.
@@ -66,15 +59,8 @@ public class MailService {
             Context context = new Context(LOCALE, mail.variables());
             context.setVariable("subject", mail.subject());
             String html = templateEngine.process(mail.template(), context);
-
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, StandardCharsets.UTF_8.name());
-            helper.setFrom(properties.from());
-            helper.setTo(mail.to());
-            helper.setSubject(mail.subject());
-            helper.setText(html, true);
-            mailSender.send(message);
-        } catch (MessagingException | RuntimeException ex) {
+            transport.send(mail.to(), mail.subject(), html);
+        } catch (RuntimeException ex) {
             log.error("No se pudo mandar el mail \"{}\" a {}", mail.subject(), mail.to(), ex);
         }
     }

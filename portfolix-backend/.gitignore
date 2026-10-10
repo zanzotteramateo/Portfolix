@@ -4,6 +4,10 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+# El front compilado (deploy de un solo origen, fase 12): lo copia el Dockerfile de la raíz al buildear
+# la imagen; nunca se commitea.
+src/main/resources/static/
+
 ### STS ###
 .apt_generated
 .classpath

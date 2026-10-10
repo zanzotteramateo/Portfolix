@@ -280,21 +280,27 @@ Cada módulo contiene su entidad, repository, service, controller, `dto/` y mapp
 
 **Fase 11E (front: tests end-to-end con Playwright) — completada (04/10/2026).** Detalles en `portfolix-frontend/CLAUDE.md`. Sin cambios en el backend.
 
-**Fase 12 (deploy en Fly.io) — en curso (04/10/2026).** Decisiones tomadas: Fly.io (API y front, cada uno en su app), Postgres administrado de Fly, Brevo para los mails (SMTP, STARTTLS), dominio propio con `app.` (front) y `api.` (API), que son el mismo sitio para que la cookie `SameSite=Strict` viaje. Lo que hizo el código:
-- `portfolix-backend/fly.toml`: la app `portfolix-api` (Dockerfile del backend, una sola instancia siempre prendida, health check en `/actuator/health`, `SERVER_FORWARD_HEADERS_STRATEGY=native` para que el rate limit vea la IP real, 512 MB).
-- `portfolix-frontend/`: `Dockerfile` (Vite y después nginx sin root, en el puerto 8080), `nginx.conf` (fallback de SPA, caché de `assets/`, Referrer-Policy para el botón de Google), `.dockerignore`, `fly.toml` (la app `portfolix-web`). La URL de la API es `VITE_API_URL` (en `client.ts`; sin la variable queda el proxy de Vite). Probado en local: la imagen sirve el SPA, cachea los assets y tiene los headers.
+**Fase 12 (deploy gratis en Render) — en curso (09/10/2026).** El plan original era Fly.io con dominio propio (ver más abajo); Fly sacó su capa gratis en 2024 y un Postgres administrado ahí arranca en ~US$38/mes, así que se cambió a una pila sin costo: **Render** (un solo Web Service gratis, front y API desde el mismo origen), **Neon** (Postgres gratis, no expira; el de Render gratis se borra a los 30 días) y **Brevo** para los mails, pero por su **API HTTP en vez de SMTP** (Render bloquea los puertos SMTP en el plan gratis desde 2025). **Sin dominio propio**: alcanza con el subdominio gratis de Render, porque front y API comparten el mismo origen (no dos subdominios `app.`/`api.` como en el plan de Fly), así que la cookie `SameSite=Strict` viaja sin truco.
+
+Lo que hizo el código:
+- **`Dockerfile` y `.dockerignore` en la raíz del repo** (no en `portfolix-backend/`, porque necesita ver los dos directorios a la vez): compila el front **sin `VITE_API_URL`** (así `client.ts` llama a rutas relativas, mismo origen) y copia `dist/` dentro de `portfolix-backend/src/main/resources/static/` antes de compilar el backend, así el front queda empaquetado en el jar. `portfolix-backend/src/main/resources/static/` está en `.gitignore`: solo lo llena este Dockerfile, nunca se commitea.
+- **`config/SpaWebConfig`**: sirve ese front con el fallback típico de SPA (recargar `/transactions` no da 404: cualquier ruta que no sea un archivo real ni empiece con `/api` devuelve `index.html`) y cachea `/assets/` (tienen hash en el nombre) por un año. En dev y en los tests no hay nada en `static/`, así que esto no hace nada (el front sigue sirviéndose con `npm run dev`).
+- **`SecurityConfig`**: `.anyRequest().authenticated()` pasó a `.requestMatchers("/api/**").authenticated()` + `.anyRequest().permitAll()` — sin este cambio, la página ni cargaría sin sesión (exigía JWT hasta para el `index.html`). Se agregó el header `Referrer-Policy` (lo necesita el botón de Google; antes lo ponía el `nginx` del plan de Fly, acá no hay).
+- **`common/mail`**: la lógica de SMTP de siempre quedó en `SmtpMailTransport` (interfaz nueva `MailTransport`, sin cambiar su comportamiento) y se agregó `BrevoMailTransport`, que manda por `POST api.brevo.com/v3/smtp/email`. Se elige con `portfolix.mail.provider` (`MAIL_PROVIDER`), default `smtp` (no cambia nada en dev ni en los tests). Variable nueva: `BREVO_API_KEY` (solo hace falta con `MAIL_PROVIDER=brevo-api`).
+- Probado en local: `docker build` de la imagen combinada (compila bien) y el contenedor corriendo contra el Postgres de `compose.yaml` — `/` sirve el front real (con sus `<script>`/`<link>` de verdad), `/transactions` cae a `index.html`, `/assets/*.js` se sirve con `Cache-Control: max-age=31536000`, y `/api/v1/**` sigue protegido (401 sin token; 404 de verdad, no el front, si está logueado y la ruta no existe).
+- Los archivos del plan anterior (Fly.io: `portfolix-backend/fly.toml`, y en `portfolix-frontend/`: `Dockerfile`, `nginx.conf`, `.dockerignore`, `fly.toml`) siguen en el repo sin tocar, por si más adelante compran un dominio propio y prefieren esa opción (dos apps separadas, mejor aislamiento).
 
 Lo que falta, en orden (lo hace el usuario):
-1. Comprar el dominio y reemplazar `TU-DOMINIO` en los dos `fly.toml`.
-2. Crear las apps (`fly apps create portfolix-api` y `fly apps create portfolix-web`). Los nombres son globales en Fly: si están tomados, cambiarlos en los `fly.toml`.
-3. Crear Postgres administrado en Fly. Antes de contratar, confirmar que tenga backups y cuánto cuesta.
-4. Secretos de la API con `fly secrets set -a portfolix-api` (no van al repo ni al chat): `DB_HOST`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET` (generada en tu máquina con `openssl rand -base64 32`), `MAIL_USERNAME` y `MAIL_PASSWORD` (las credenciales SMTP de Brevo).
-5. Brevo: cuenta, dominio verificado y los registros SPF y DKIM en el DNS.
-6. Google Cloud: agregar `https://app.<dominio>` como origen del Client ID de producción. Ese Client ID va en `GOOGLE_CLIENT_ID` (API) y `VITE_GOOGLE_CLIENT_ID` (front).
-7. Deploy: `fly deploy` en `portfolix-backend/` y en `portfolix-frontend/`. Después `fly certs add api.<dominio>` y `fly certs add app.<dominio>`, y los registros DNS que pida Fly.
-8. Smoke test en producción con una cuenta descartable (registro, mail, login, una compra) que después se borra. Monitor de uptime externo (Fly no lo trae) y revisar backups.
+1. ~~Cuentas de Render, Neon y Brevo~~ — hecho (09/10/2026).
+2. ~~Proyecto en Neon~~ — hecho: la cadena de conexión **directa** (sin pooler) queda guardada para separarla en `DB_HOST`/`DB_NAME`/`DB_USERNAME`/`DB_PASSWORD` al configurar Render.
+3. ~~Remitente verificado y API key en Brevo~~ — hecho.
+4. En Render: crear un **Web Service** nuevo apuntado a este repo de GitHub, con el `Dockerfile` de la raíz (contexto de build: la raíz del repo).
+5. Variables de entorno en Render: `DB_HOST`, `DB_PORT` (5432), `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD` (de Neon), `JWT_SECRET` (generada con `openssl rand -base64 32`), `MAIL_FROM`, `FRONTEND_URL` (la URL que da Render, ej. `https://portfolix.onrender.com`, la misma para las dos), `MAIL_PROVIDER=brevo-api`, `BREVO_API_KEY`. `GOOGLE_CLIENT_ID` y `VITE_GOOGLE_CLIENT_ID` quedan para cuando agreguen esa URL como origen autorizado en Google Cloud (opcional: sin esto, todo funciona salvo el botón de Google).
+6. Deploy (Render lo hace solo en cada push a `main`, como el CI).
+7. Smoke test con una cuenta descartable (registro, mail, login, una compra) que después se borra.
+8. El plan de Fly con dominio propio (pasos 1-8 de antes, incluido comprar el dominio, SPF/DKIM de Brevo por dominio y `fly deploy`) queda como alternativa para más adelante, no se hace ahora.
 
-Una sola instancia: el rate limit y el bloqueo de login viven en memoria.
+Una sola instancia: el rate limit y el bloqueo de login viven en memoria. Con el plan gratis, el servicio de Render se duerme a los 15 min sin visitas (tarda ~1 min en responder la primera vez) y el cómputo de Neon se suspende solo (se reactiva con la próxima consulta, sin intervención).
 
 ## Entorno de desarrollo (Windows)
 - El `JAVA_HOME` del sistema apunta a JDK 21, pero el proyecto usa **JDK 25**. Antes de `./mvnw` en Git Bash: `export JAVA_HOME="/c/Program Files/Eclipse Adoptium/jdk-25.0.4.101-hotspot"` (en el IDE, elegir el JDK 25).

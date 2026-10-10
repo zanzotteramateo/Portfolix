@@ -1,0 +1,12 @@
+# Lo que no hace falta mandarle a Docker para construir la imagen combinada (ver Dockerfile).
+.git/
+.github/
+*.md
+
+portfolix-backend/target/
+portfolix-backend/.mvn/wrapper/maven-wrapper.jar
+
+portfolix-frontend/node_modules/
+portfolix-frontend/dist/
+portfolix-frontend/playwright-report/
+portfolix-frontend/test-results/
