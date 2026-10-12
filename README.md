@@ -2,15 +2,43 @@
 
 [![Backend CI](https://github.com/zanzotteramateo/Portfolix/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/zanzotteramateo/Portfolix/actions/workflows/backend-ci.yml)
 [![Frontend CI](https://github.com/zanzotteramateo/Portfolix/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/zanzotteramateo/Portfolix/actions/workflows/frontend-ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+![Java](https://img.shields.io/badge/Java-25-ED8B00?logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.1-6DB33F?logo=springboot&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169E1?logo=postgresql&logoColor=white)
 
 App web para seguir una cartera de inversiones personal: **acciones argentinas, CEDEARs y criptomonedas**.
 Registrás tus compras y ventas, las agrupás en portafolios ("Jubilación", "Ahorro Crypto"…) y ves cuánto vale
 tu cartera hoy, cuánto ganaste o perdiste y cómo está repartida, en pesos o en dólares.
 
-> **Estado:** el backend (API REST) y el front en React están completos: cuentas (registro, verificación por mail,
-> login, Google y recuperación de contraseña), dashboard, detalle de cada activo, portafolios, historial con edición
-> de operaciones, cuenta (contraseña, correo y eliminarla), ajustes (tema claro y oscuro, separador decimal) y tests
-> end-to-end con Playwright. Falta el deploy.
+**🔗 Demo en vivo:** **https://portfolix-xt5h.onrender.com** ·
+[documentación de la API (Swagger)](https://portfolix-xt5h.onrender.com/swagger-ui.html)
+
+> Corre en el plan gratuito de Render: si nadie la visitó en los últimos 15 minutos, se duerme, así que la
+> primera carga puede tardar ~1 minuto en responder (la base en Neon se reactiva sola). Después anda normal.
+
+> **Estado:** proyecto completo y en producción — backend (API REST), front en React y deploy. Cuentas (registro
+> con verificación por mail, login con Google, recuperación de contraseña y bloqueo por intentos), portafolios,
+> historial de operaciones con edición y borrado, dashboard con precios en vivo, cuenta y preferencias, y tests
+> end-to-end con Playwright.
+
+## Capturas
+
+<p align="center">
+  <img src="docs/screenshots/dashboard.jpg" width="49%" alt="Dashboard con el valor de la cartera, distribución por tipo de activo y la tabla de posiciones" />
+  <img src="docs/screenshots/dashboard-dark.jpg" width="49%" alt="El mismo dashboard en modo oscuro" />
+</p>
+<p align="center">
+  <img src="docs/screenshots/asset-detail.jpg" width="49%" alt="Panel de detalle de un activo, con precio actual y tendencias de 7 días y 24 horas" />
+  <img src="docs/screenshots/historial.jpg" width="49%" alt="Historial de transacciones con filtros y totales" />
+</p>
+<p align="center">
+  <img src="docs/screenshots/login.jpg" width="49%" alt="Pantalla de inicio de sesión" />
+  <img src="docs/screenshots/register.jpg" width="49%" alt="Pantalla de registro de cuenta" />
+</p>
 
 ## Qué hace
 
@@ -22,8 +50,8 @@ tu cartera hoy, cuánto ganaste o perdiste y cómo está repartida, en pesos o e
 - **Precios en vivo**: acciones y CEDEARs de BYMA, cripto y cotización del dólar, con historial de 24 h y 7 días.
 - **Cuentas**: registro con verificación por mail, login con Google, recuperación de contraseña, bloqueo tras
   intentos fallidos y rate limit por IP.
-- **Cuenta y preferencias**: cambio de mail y de contraseña, tema, separador decimal, exportar el historial a CSV
-  y eliminar la cuenta.
+- **Cuenta y preferencias**: cambio de mail y de contraseña, tema claro/oscuro, separador decimal, exportar el
+  historial a CSV y eliminar la cuenta.
 
 ## Stack
 
@@ -32,7 +60,8 @@ PostgreSQL 17 · Flyway · Caffeine · Bucket4j · Thymeleaf (mails) · springdo
 
 **Front:** React 19 · TypeScript · Vite · Redux Toolkit · React Router · React Hook Form · CSS Modules
 
-**Infraestructura:** Docker · Docker Compose · GitHub Actions · Dependabot
+**Infraestructura:** Docker · GitHub Actions · Dependabot · [Render](https://render.com) (hosting) ·
+[Neon](https://neon.tech) (Postgres) · [Brevo](https://www.brevo.com) (mails)
 
 ## Decisiones de diseño
 
@@ -69,8 +98,12 @@ API REST en capas (controller → service → repository), organizada por funcio
 | `asset`, `market` | catálogo de 58 activos y precios en vivo |
 | `common`, `security`, `config` | errores, mails, seguridad, caché |
 
-Fuentes de mercado: [Data912](https://data912.com) (BYMA), [Binance](https://www.binance.com) (cripto),
-[DolarApi](https://dolarapi.com) y [ArgentinaDatos](https://argentinadatos.com) (dólar).
+Fuentes de mercado: [Data912](https://data912.com) (acciones y CEDEARs de BYMA), [CoinGecko](https://www.coingecko.com)
+(cripto), [DolarApi](https://dolarapi.com) (dólar) y [ArgentinaDatos](https://argentinadatos.com) (dólar histórico).
+
+En producción, el front (React) se compila y se empaqueta dentro del mismo jar del backend (ver `Dockerfile` en la
+raíz), así los dos se sirven desde el mismo origen: la cookie del refresh token (`SameSite=Strict`) funciona sin
+necesitar un dominio propio con subdominios `app.`/`api.`.
 
 ## Cómo correrlo
 
@@ -129,20 +162,23 @@ La imagen arranca con la configuración de producción y **no arranca si falta a
 
 La JVM usa hasta el 75% de la memoria del contenedor; con un límite de 512 MB, la app ronda los 360 MB.
 
+El deploy real (Render) compila front y backend juntos con el `Dockerfile` de la raíz del repo — ver "Arquitectura".
+
 ## Estructura del repo
 
 ```
 Portfolix/
 ├── portfolix-backend/      API REST (Spring Boot)
-│   └── CLAUDE.md           notas de desarrollo: convenciones, decisiones y estado de cada fase
 ├── portfolix-frontend/     front (React + Vite)
-│   └── CLAUDE.md           notas de desarrollo del front
+├── docs/screenshots/       capturas usadas en este README
+├── Dockerfile              imagen combinada (front + backend) para el deploy en Render
 └── .github/                CI (GitHub Actions) y Dependabot
 ```
 
-## Roadmap
+## Licencia
 
-1. ~~Backend: modelo de datos, auth, portafolios, operaciones, dashboard, datos de mercado y cuenta~~ (hecho)
-2. ~~Base para producción: CI, configuración de producción e imagen Docker~~ (hecho)
-3. ~~Front en React, a partir del diseño en Figma, con tests end-to-end~~ (hecho)
-4. Deploy
+[MIT](LICENSE).
+
+---
+
+Hecho por [@zanzotteramateo](https://github.com/zanzotteramateo).

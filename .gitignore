@@ -1,0 +1,7 @@
+# Notas de desarrollo para Claude Code: quedan en disco (siguen dando contexto en este equipo),
+# pero no se publican en GitHub.
+CLAUDE.md
+
+# Sistema operativo y editores
+.DS_Store
+Thumbs.db

@@ -11,20 +11,26 @@
 	<groupId>com.portfolix</groupId>
 	<artifactId>portfolix-backend</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name/>
-	<description/>
-	<url/>
+	<name>portfolix-backend</name>
+	<description>API REST de Portfolix, una app para seguir una cartera de acciones argentinas, CEDEARs y criptomonedas</description>
+	<url>https://github.com/zanzotteramateo/Portfolix</url>
 	<licenses>
-		<license/>
+		<license>
+			<name>MIT License</name>
+			<url>https://github.com/zanzotteramateo/Portfolix/blob/main/LICENSE</url>
+		</license>
 	</licenses>
 	<developers>
-		<developer/>
+		<developer>
+			<name>Mateo Zanzottera</name>
+			<url>https://github.com/zanzotteramateo</url>
+		</developer>
 	</developers>
 	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
+		<connection>scm:git:https://github.com/zanzotteramateo/Portfolix.git</connection>
+		<developerConnection>scm:git:https://github.com/zanzotteramateo/Portfolix.git</developerConnection>
+		<tag>HEAD</tag>
+		<url>https://github.com/zanzotteramateo/Portfolix</url>
 	</scm>
 	<properties>
 		<java.version>25</java.version>
