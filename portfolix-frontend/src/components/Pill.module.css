@@ -1,0 +1,31 @@
+.pill {
+  display: inline-block;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.normal {
+  padding: 2px 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.small {
+  padding: 1px 7px;
+  font-size: 11px;
+}
+
+.gain {
+  color: var(--status-gain);
+  background: var(--gain-soft);
+}
+
+.loss {
+  color: var(--status-loss);
+  background: var(--loss-soft);
+}
+
+.neutral {
+  color: var(--text-muted);
+  background: var(--surface-2);
+}

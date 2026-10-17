@@ -1,4 +1,4 @@
-package com.portfolix.api.market;
+package com.portfolix.api.market.source;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

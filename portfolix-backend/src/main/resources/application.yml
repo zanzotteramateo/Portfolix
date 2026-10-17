@@ -129,7 +129,7 @@ portfolix:
       fx-history: 12h
       crypto-day-history: 5m    # velas de 15 min (gráfico de 24 h)
       crypto-week-history: 15m  # velas de 1 h (gráfico de 7 días)
-      daily-closes: 6h          # cierres diarios de BYMA: cambian una vez por día
+      daily-closes: 6h          # cierres diarios de BYMA y de cripto: cambian una vez por día
     sources:
       dolar-api: https://dolarapi.com
       argentina-datos: https://api.argentinadatos.com
@@ -138,6 +138,9 @@ portfolix:
       # exchange, y no tiene esa restricción. API pública, sin clave.
       coin-gecko: https://api.coingecko.com/api/v3
       data912: https://data912.com
+      # Cierres diarios de cripto con años de historia (CoinGecko gratis da solo los últimos 365 días).
+      # Exchange de EE.UU.: no bloquea a Render. API pública, sin clave.
+      coinbase: https://api.exchange.coinbase.com
 
 springdoc:
   swagger-ui:

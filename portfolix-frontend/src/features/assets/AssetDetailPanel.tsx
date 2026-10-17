@@ -4,9 +4,12 @@ import { useAppSelector } from '../../app/hooks'
 import { AssetIcon, TypeBadge } from '../../components/AssetBadges'
 import { LineChart } from '../../components/charts/LineChart'
 import { CloseIcon } from '../../components/icons'
+import { Pill } from '../../components/Pill'
 import { formatDate, tone } from '../../format/format'
 import { useFormat } from '../../format/useFormat'
 import { useApiResource } from '../../hooks/useApiResource'
+import table from '../../styles/table.module.css'
+import tones from '../../styles/tones.module.css'
 import styles from './AssetDetailPanel.module.css'
 
 /**
@@ -71,7 +74,7 @@ export function AssetDetailPanel({ symbol, portfolioId, onClose }: {
             {quote.data ? format.price(quote.data.price, currency) : quote.error ? 'No disponible' : '…'}
           </span>
           {quote.data?.change24hPercent != null && (
-            <span className={styles[tone(quote.data.change24hPercent)]}>
+            <span className={tones[tone(quote.data.change24hPercent)]}>
               {format.percent(quote.data.change24hPercent, { sign: true })} hoy
             </span>
           )}
@@ -88,15 +91,15 @@ export function AssetDetailPanel({ symbol, portfolioId, onClose }: {
         {operations.error && <p className={styles.note}>{operations.error.message}</p>}
         {operations.data?.content.length === 0 && <p className={styles.note}>Todavía no operaste este activo.</p>}
         {operations.data && operations.data.content.length > 0 && (
-          <div className={styles.tableWrapper}>
-          <table className={styles.table}>
+          <div className={`${table.wrapper} ${table.compact}`}>
+          <table className={table.table}>
             <thead>
               <tr>
                 <th scope="col">Fecha</th>
                 <th scope="col">Tipo</th>
-                <th scope="col" className={styles.numeric}>Cant.</th>
-                <th scope="col" className={styles.numeric}>Precio</th>
-                <th scope="col" className={styles.numeric}>Monto</th>
+                <th scope="col" className={table.numeric}>Cant.</th>
+                <th scope="col" className={table.numeric}>Precio</th>
+                <th scope="col" className={table.numeric}>Monto</th>
                 {portfolioId === null && <th scope="col">Portafolio</th>}
               </tr>
             </thead>
@@ -105,13 +108,13 @@ export function AssetDetailPanel({ symbol, portfolioId, onClose }: {
                 <tr key={op.id}>
                   <td>{formatDate(op.tradeDate)}</td>
                   <td>
-                    <span className={`${styles.typePill} ${op.type === 'BUY' ? styles.buy : styles.sell}`}>
+                    <Pill tone={op.type === 'BUY' ? 'gain' : 'loss'} size="small">
                       {op.type === 'BUY' ? '↑ Compra' : '↓ Venta'}
-                    </span>
+                    </Pill>
                   </td>
-                  <td className={styles.numeric}>{format.quantity(op.quantity, op.asset.type)}</td>
-                  <td className={styles.numeric}>{format.price(op.price, op.currency)}</td>
-                  <td className={styles.numeric}>{format.money(op.total, op.currency)}</td>
+                  <td className={table.numeric}>{format.quantity(op.quantity, op.asset.type)}</td>
+                  <td className={table.numeric}>{format.price(op.price, op.currency)}</td>
+                  <td className={table.numeric}>{format.money(op.total, op.currency)}</td>
                   {portfolioId === null && (
                     <td className={styles.portfolio} title={op.portfolio.name}>
                       {op.portfolio.name}
@@ -140,7 +143,7 @@ function TrendCard({ title, history }: {
     <div className={styles.trend}>
       <div className={styles.trendHeader}>
         <span className={styles.label}>{title}</span>
-        {change !== null && <span className={styles[tone(change)]}>{format.percent(change, { sign: true })}</span>}
+        {change !== null && <span className={tones[tone(change)]}>{format.percent(change, { sign: true })}</span>}
       </div>
       {history.data ? (
         <LineChart values={history.data.points.map((p) => Number(p.price))} color={color} height={48} area label={title} />

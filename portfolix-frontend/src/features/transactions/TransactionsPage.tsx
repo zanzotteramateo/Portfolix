@@ -1,12 +1,13 @@
 import { useState } from 'react'
-import { useSearchParams } from 'react-router'
 import { toApiErrorData } from '../../api/client'
 import type { TransactionPageResponse, TransactionResponse } from '../../api/types'
 import { useAppSelector } from '../../app/hooks'
 import { Alert } from '../../components/Alert'
+import { PageHeader } from '../../components/PageHeader'
 import { plural } from '../../format/format'
 import { useFormat } from '../../format/useFormat'
 import { useApiResource } from '../../hooks/useApiResource'
+import { useUrlParams } from '../../hooks/useUrlParams'
 import { DisplayControls } from '../preferences/DisplayControls'
 import { DeleteTransactionDialog } from './DeleteTransactionDialog'
 import { downloadTransactionsCsv } from './downloadTransactionsCsv'
@@ -18,14 +19,15 @@ import styles from './TransactionsPage.module.css'
 
 /**
  * El historial de operaciones (/transactions): tarjetas de totales, filtros, la tabla paginada y el CSV.
- * Filtros y página viven en la URL. Editar y borrar se hacen desde cada fila. Al cerrar el diálogo de editar se
+ * Filtros y página viven en la URL; al cambiarlos se ven los datos anteriores atenuados hasta que llegan los
+ * nuevos. Editar y borrar se hacen desde cada fila. Al cerrar el diálogo de editar se
  * vuelve a pedir la página, falle o no la operación: si otro cambio la tocó, así se ve el estado real.
  */
 export function TransactionsPage() {
   const format = useFormat()
-  const [searchParams, setSearchParams] = useSearchParams()
-  const filters = readFilters(searchParams)
-  const page = readPage(searchParams)
+  const [params, updateParams] = useUrlParams()
+  const filters = readFilters(params)
+  const page = readPage(params)
 
   const currency = useAppSelector((state) => state.preferences.currency)
   const preferencesStatus = useAppSelector((state) => state.preferences.status)
@@ -33,51 +35,30 @@ export function TransactionsPage() {
   const assets = useAppSelector((state) => state.assets.items)
   // Como en el dashboard: se espera a las preferencias para pedir en la moneda que el usuario eligió.
   const canFetch = preferencesStatus === 'ready' || preferencesStatus === 'error'
-  const list = useApiResource<TransactionPageResponse>(canFetch ? transactionsPath(filters, page, currency) : null)
+  const list = useApiResource<TransactionPageResponse>(canFetch ? transactionsPath(filters, page, currency) : null, {
+    keepPrevious: true,
+  })
 
   const [editing, setEditing] = useState<TransactionResponse | null>(null)
   const [deleting, setDeleting] = useState<TransactionResponse | null>(null)
   const [exporting, setExporting] = useState(false)
   const [exportError, setExportError] = useState<string | null>(null)
 
-  // Al cambiar de filtro o de página se siguen mostrando los datos anteriores, atenuados, hasta que llegan los
-  // nuevos (si no, la tabla desaparecería y volvería en cada clic).
-  const [lastLoaded, setLastLoaded] = useState<TransactionPageResponse | null>(null)
-  if (list.data && list.data !== lastLoaded) {
-    setLastLoaded(list.data) // se guarda durante el dibujado (así lo recomienda React), sin un efecto
-  }
-  const data = list.error ? null : (list.data ?? lastLoaded)
-  const refreshing = list.data === null && !list.error && lastLoaded !== null
+  const data = list.data
+  const refreshing = list.refreshing
   const fieldErrors = list.error?.fieldErrors ?? {}
   const hasFieldErrors = Object.keys(fieldErrors).length > 0
 
   function updateFilters(changes: Partial<HistoryFilters>) {
-    setSearchParams((params) => {
-      for (const [key, value] of Object.entries(changes)) {
-        if (value) {
-          params.set(key, value)
-        } else {
-          params.delete(key)
-        }
-      }
-      params.delete('page') // un filtro nuevo empieza en la primera página
-      return params
-    })
+    updateParams({ ...changes, page: null }) // un filtro nuevo empieza en la primera página
   }
 
   function goToPage(number: number) {
-    setSearchParams((params) => {
-      if (number > 0) {
-        params.set('page', String(number))
-      } else {
-        params.delete('page')
-      }
-      return params
-    })
+    updateParams({ page: number > 0 ? String(number) : null })
   }
 
   function clearFilters() {
-    setSearchParams(new URLSearchParams())
+    updateParams({ portfolioId: null, assetSymbol: null, type: null, from: null, to: null, page: null })
   }
 
   // Si se borró la última operación de una página que no es la primera, se vuelve a la anterior (la nueva
@@ -111,25 +92,19 @@ export function TransactionsPage() {
 
   return (
     <div className={styles.page}>
-      <header className={styles.pageHeader}>
-        <div>
-          <h1 className={styles.title}>Historial de Transacciones</h1>
-          <p className={styles.subtitle}>Tus compras y ventas, de la más reciente a la más antigua.</p>
-        </div>
-        <div className={styles.headerActions}>
-          <DisplayControls />
-          <button
-            type="button"
-            className={styles.secondaryButton}
-            onClick={exportCsv}
-            disabled={exporting}
-            aria-busy={exporting || undefined}
-            title="Descarga todo el historial, sin los filtros"
-          >
-            {exporting ? 'Exportando…' : 'Exportar CSV'}
-          </button>
-        </div>
-      </header>
+      <PageHeader title="Historial de Transacciones" subtitle="Tus compras y ventas, de la más reciente a la más antigua.">
+        <DisplayControls />
+        <button
+          type="button"
+          className={styles.secondaryButton}
+          onClick={exportCsv}
+          disabled={exporting}
+          aria-busy={exporting || undefined}
+          title="Descarga todo el historial, sin los filtros"
+        >
+          {exporting ? 'Exportando…' : 'Exportar CSV'}
+        </button>
+      </PageHeader>
 
       {exportError && <Alert>{exportError}</Alert>}
 

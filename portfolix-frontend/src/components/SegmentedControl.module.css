@@ -37,7 +37,7 @@
 
 .active {
   background: var(--accent-strong);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .gain {

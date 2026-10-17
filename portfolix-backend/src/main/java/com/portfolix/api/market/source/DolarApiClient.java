@@ -1,6 +1,7 @@
-package com.portfolix.api.market;
+package com.portfolix.api.market.source;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.portfolix.api.market.FxRateType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 

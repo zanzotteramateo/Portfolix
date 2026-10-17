@@ -1,6 +1,9 @@
-package com.portfolix.api.market;
+package com.portfolix.api.market.source;
 
+import com.portfolix.api.market.FxRateType;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.HttpServerErrorException;
@@ -17,9 +20,11 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 import static org.springframework.http.HttpMethod.GET;
 
@@ -35,7 +40,7 @@ class MarketClientsTest {
             new MarketProperties.Refresh(Duration.ofMinutes(5), Duration.ofMinutes(15), Duration.ofHours(12),
                     Duration.ofMinutes(5), Duration.ofMinutes(15), Duration.ofHours(6)),
             new MarketProperties.Sources("https://dolarapi.test", "https://argentinadatos.test",
-                    "https://coingecko.test", "https://data912.test"),
+                    "https://coingecko.test", "https://data912.test", "https://coinbase.test"),
             new MarketProperties.Fixed(BigDecimal.ONE, Map.of()));
 
     @Test
@@ -153,6 +158,43 @@ class MarketClientsTest {
                 new Data912Client.Candle(LocalDate.of(2026, 9, 28), new BigDecimal("6005.0")));
         assertThat(client.history(com.portfolix.api.asset.AssetType.CEDEAR, "AAPL")).hasSize(1);
         server.verify();
+    }
+
+    @Test
+    void coinbase_readsDailyCandles_withTheRequiredUserAgent() {
+        RestClient.Builder builder = RestClient.builder();
+        MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
+        server.expect(request -> {
+                    assertThat(request.getURI().getPath()).isEqualTo("/products/BTC-USD/candles");
+                    assertThat(URLDecoder.decode(request.getURI().getRawQuery(), StandardCharsets.UTF_8))
+                            .isEqualTo("granularity=86400&start=2025-07-01T00:00:00Z&end=2025-12-31T00:00:00Z");
+                })
+                .andExpect(header(HttpHeaders.USER_AGENT, "Portfolix"))
+                .andRespond(withSuccess("""
+                        [[1767139200,87100.5,89000,88200,88430.25,4907.4],
+                         [1751328000,105262,107579.3,107173.21,105711.78,5152.7]]
+                        """, MediaType.APPLICATION_JSON));
+
+        List<CoinbaseClient.DailyClose> closes = new CoinbaseClient(builder, PROPERTIES)
+                .dailyCloses("BTC", LocalDate.of(2025, 7, 1), LocalDate.of(2025, 12, 31));
+
+        // Vienen de la más nueva a la más vieja; cada una con el día UTC en que empieza y su cierre (el 5.º valor).
+        assertThat(closes).containsExactly(
+                new CoinbaseClient.DailyClose(LocalDate.of(2025, 12, 31), new BigDecimal("88430.25")),
+                new CoinbaseClient.DailyClose(LocalDate.of(2025, 7, 1), new BigDecimal("105711.78")));
+        server.verify();
+    }
+
+    @Test
+    void coinbase_aCoinItDoesNotHave_hasNoCandles() {
+        RestClient.Builder builder = RestClient.builder();
+        MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
+        server.expect(request -> assertThat(request.getURI().getPath()).isEqualTo("/products/XYZ-USD/candles"))
+                .andRespond(withStatus(HttpStatus.NOT_FOUND)
+                        .body("{\"message\":\"NotFound\"}").contentType(MediaType.APPLICATION_JSON));
+
+        assertThat(new CoinbaseClient(builder, PROPERTIES)
+                .dailyCloses("XYZ", LocalDate.of(2025, 7, 1), LocalDate.of(2025, 12, 31))).isEmpty();
     }
 
     @Test

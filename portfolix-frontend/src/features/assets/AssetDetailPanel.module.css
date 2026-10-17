@@ -127,76 +127,9 @@
   color: var(--text-muted);
 }
 
-/* Si las columnas no entran, se desplaza la tabla y no el panel entero. */
-.tableWrapper {
-  overflow-x: auto;
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 11px;
-}
-
-.table th {
-  padding: 8px 4px;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-align: left;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  border-bottom: 1px solid var(--border-default);
-}
-
-.table td {
-  padding: 9px 4px;
-  border-bottom: 1px solid var(--border-subtle);
-  white-space: nowrap;
-}
-
-.table .numeric {
-  text-align: right;
-  font-family: var(--font-mono);
-}
-
-.table th.numeric {
-  font-family: var(--font-sans);
-}
-
 .portfolio {
   max-width: 64px;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: var(--text-muted);
-}
-
-.typePill {
-  display: inline-block;
-  padding: 1px 7px;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.buy {
-  color: var(--status-gain);
-  background: var(--gain-soft);
-}
-
-.sell {
-  color: var(--status-loss);
-  background: var(--loss-soft);
-}
-
-.gain {
-  color: var(--status-gain);
-}
-
-.loss {
-  color: var(--status-loss);
-}
-
-.neutral {
   color: var(--text-muted);
 }

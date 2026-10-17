@@ -1,0 +1,87 @@
+/*
+ * Las tablas de datos: activos del dashboard, historial, análisis y operaciones del panel de un activo.
+ * Uso: <div className={table.wrapper}><table className={table.table}>…, y table.numeric en las columnas de números.
+ */
+
+/* Si las columnas no entran, se desplaza la tabla y no la página. */
+.wrapper {
+  overflow-x: auto;
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table th {
+  padding: 12px 10px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.table td {
+  padding: 10px;
+  border-bottom: 1px solid var(--border-subtle);
+  white-space: nowrap;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover td {
+  background: var(--row-hover);
+}
+
+.table .numeric {
+  text-align: right;
+  font-family: var(--font-mono);
+}
+
+.table th.numeric {
+  font-family: var(--font-sans);
+}
+
+/* La columna por la que está ordenada la tabla. */
+.table .sorted {
+  color: var(--accent);
+}
+
+/* Filas que abren un detalle con un clic. */
+.clickable {
+  cursor: pointer;
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+/* Versión compacta, para el panel de detalle de un activo: sin borde propio y con menos espacio. */
+.compact {
+  background: none;
+  border: none;
+  border-radius: 0;
+}
+
+.compact .table {
+  font-size: 11px;
+}
+
+.compact .table th {
+  padding: 8px 4px;
+  letter-spacing: 0.06em;
+}
+
+.compact .table td {
+  padding: 9px 4px;
+}

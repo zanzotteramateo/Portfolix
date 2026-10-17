@@ -238,3 +238,46 @@ export interface TransactionPageResponse {
   /** No aplica el filtro de tipo (las tarjetas no cambian con Compras/Ventas). */
   summary: TransactionSummary
 }
+
+/** PerformanceResponse.AssetPerformance: una fila del análisis (un activo que se tuvo en el período). */
+export interface AssetPerformance {
+  symbol: string
+  name: string
+  type: AssetType
+  startQuantity: Decimal
+  endQuantity: Decimal
+  startValue: Decimal
+  bought: Decimal
+  sold: Decimal
+  endValue: Decimal
+  /** endValue − startValue − bought + sold */
+  pnl: Decimal
+  /** Ponderado por tiempo; null si no hubo capital. */
+  pnlPercent: Decimal | null
+  /** Algún día no tuvo precio de mercado y se usó el de la última operación propia. */
+  estimatedPrice: boolean
+}
+
+/** PerformanceResponse: GET /performance (el análisis de un período, en la moneda pedida). */
+export interface PerformanceResponse {
+  currency: Currency
+  /** El inicio del período (la primera operación si no se pidió uno). */
+  from: string
+  to: string
+  /** Al cierre del día anterior a `from`. */
+  startValue: Decimal
+  endValue: Decimal
+  bought: Decimal
+  sold: Decimal
+  pnl: Decimal
+  pnlPercent: Decimal | null
+  /** El que más ganó entre los que ganaron; null si ninguno ganó. */
+  best: AssetPerformance | null
+  /** El que más perdió entre los que perdieron; null si ninguno perdió. */
+  worst: AssetPerformance | null
+  /** Desde el día anterior a `from`; un punto por día (por semana si el rango pasa los 400 días). */
+  series: { date: string; value: Decimal; netInvested: Decimal }[]
+  /** De mayor a menor resultado; incluye los que se vendieron en el período. */
+  assets: AssetPerformance[]
+  pricesUpdatedAt: string | null
+}

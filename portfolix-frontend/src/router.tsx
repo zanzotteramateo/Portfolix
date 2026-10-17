@@ -7,6 +7,7 @@ import { LoginPage } from './features/auth/pages/LoginPage'
 import { RegisterPage } from './features/auth/pages/RegisterPage'
 import { ResetPasswordPage } from './features/auth/pages/ResetPasswordPage'
 import { VerifyEmailPage } from './features/auth/pages/VerifyEmailPage'
+import { AnalysisPage } from './features/analysis/AnalysisPage'
 import { DashboardPage } from './features/dashboard/DashboardPage'
 import { AppLayout } from './features/shell/AppLayout'
 import { TransactionsPage } from './features/transactions/TransactionsPage'
@@ -37,6 +38,7 @@ export const router = createBrowserRouter([
           { path: '/', element: <DashboardPage /> },
           { path: '/portfolios/:portfolioId', element: <DashboardPage /> },
           { path: '/transactions', element: <TransactionsPage /> },
+          { path: '/analysis', element: <AnalysisPage /> },
         ],
       },
     ],

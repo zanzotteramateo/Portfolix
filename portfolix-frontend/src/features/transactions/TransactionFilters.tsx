@@ -1,7 +1,9 @@
 import { useId } from 'react'
 import type { AssetResponse, AssetType, PortfolioResponse } from '../../api/types'
+import { Chip, ChipGroup } from '../../components/Chips'
 import { TYPE_PLURALS } from '../../format/assetTypes'
 import { todayInArgentina } from '../../format/format'
+import filterStyles from '../../styles/filters.module.css'
 import { hasFilters, type HistoryFilters } from './transactionQuery'
 import styles from './TransactionFilters.module.css'
 
@@ -34,26 +36,20 @@ export function TransactionFilters({ filters, portfolios, assets, errors, onChan
 
   return (
     <div className={styles.filters}>
-      <div className={styles.chips} role="group" aria-label="Tipo de operación">
+      <ChipGroup label="Tipo de operación">
         {TYPE_CHIPS.map((chip) => (
-          <button
-            key={chip.label}
-            type="button"
-            className={`${styles.chip} ${filters.type === chip.value ? styles.chipActive : ''}`}
-            aria-pressed={filters.type === chip.value}
-            onClick={() => onChange({ type: chip.value })}
-          >
+          <Chip key={chip.label} active={filters.type === chip.value} onClick={() => onChange({ type: chip.value })}>
             {chip.label}
-          </button>
+          </Chip>
         ))}
-      </div>
+      </ChipGroup>
 
-      <div className={styles.fields}>
-        <div className={styles.field}>
-          <label htmlFor={portfolioId} className={styles.label}>
+      <div className={filterStyles.row}>
+        <div className={filterStyles.field}>
+          <label htmlFor={portfolioId} className={filterStyles.label}>
             Portafolio
           </label>
-          <select id={portfolioId} className={styles.select} value={filters.portfolioId} onChange={(e) => onChange({ portfolioId: e.target.value })}>
+          <select id={portfolioId} className={filterStyles.control} value={filters.portfolioId} onChange={(e) => onChange({ portfolioId: e.target.value })}>
             <option value="">Todos los portafolios</option>
             {portfolios.map((p) => (
               <option key={p.id} value={p.id}>
@@ -63,11 +59,11 @@ export function TransactionFilters({ filters, portfolios, assets, errors, onChan
           </select>
         </div>
 
-        <div className={styles.field}>
-          <label htmlFor={assetId} className={styles.label}>
+        <div className={filterStyles.field}>
+          <label htmlFor={assetId} className={filterStyles.label}>
             Activo
           </label>
-          <select id={assetId} className={styles.select} value={filters.assetSymbol} onChange={(e) => onChange({ assetSymbol: e.target.value })}>
+          <select id={assetId} className={filterStyles.control} value={filters.assetSymbol} onChange={(e) => onChange({ assetSymbol: e.target.value })}>
             <option value="">Todos los activos</option>
             {ASSET_TYPES.map((type) => {
               const group = assets.filter((a) => a.type === type)
@@ -84,31 +80,31 @@ export function TransactionFilters({ filters, portfolios, assets, errors, onChan
           </select>
         </div>
 
-        <div className={styles.field}>
-          <label htmlFor={fromId} className={styles.label}>
+        <div className={filterStyles.field}>
+          <label htmlFor={fromId} className={filterStyles.label}>
             Desde
           </label>
           <input
             id={fromId}
             type="date"
-            className={`${styles.select} ${errors.from ? styles.invalid : ''}`}
+            className={`${filterStyles.control} ${errors.from ? filterStyles.invalid : ''}`}
             value={filters.from}
             max={filters.to || today}
             aria-invalid={errors.from ? true : undefined}
             aria-describedby={errors.from ? `${fromId}-error` : undefined}
             onChange={(e) => onChange({ from: e.target.value })}
           />
-          {errors.from && <p id={`${fromId}-error`} className={styles.error}>{errors.from}</p>}
+          {errors.from && <p id={`${fromId}-error`} className={filterStyles.error}>{errors.from}</p>}
         </div>
 
-        <div className={styles.field}>
-          <label htmlFor={toId} className={styles.label}>
+        <div className={filterStyles.field}>
+          <label htmlFor={toId} className={filterStyles.label}>
             Hasta
           </label>
           <input
             id={toId}
             type="date"
-            className={`${styles.select} ${errors.to ? styles.invalid : ''}`}
+            className={`${filterStyles.control} ${errors.to ? filterStyles.invalid : ''}`}
             value={filters.to}
             min={filters.from || undefined}
             max={today}
@@ -116,7 +112,7 @@ export function TransactionFilters({ filters, portfolios, assets, errors, onChan
             aria-describedby={errors.to ? `${toId}-error` : undefined}
             onChange={(e) => onChange({ to: e.target.value })}
           />
-          {errors.to && <p id={`${toId}-error`} className={styles.error}>{errors.to}</p>}
+          {errors.to && <p id={`${toId}-error`} className={filterStyles.error}>{errors.to}</p>}
         </div>
 
         {hasFilters(filters) && (

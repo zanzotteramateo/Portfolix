@@ -1,7 +1,9 @@
-package com.portfolix.api.market;
+package com.portfolix.api.market.source;
 
 import com.portfolix.api.ApiIntegrationTest;
 import com.portfolix.api.asset.AssetRepository;
+import com.portfolix.api.market.FxRateProvider;
+import com.portfolix.api.market.PriceProvider;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 

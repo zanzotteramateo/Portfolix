@@ -5,33 +5,7 @@
   min-width: 0;
 }
 
-/* ---- Cabecera ---- */
-
-.pageHeader {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.title {
-  font-size: 22px;
-  font-weight: 700;
-}
-
-.subtitle {
-  margin-top: 4px;
-  font-size: 13px;
-  color: var(--text-muted);
-}
-
-.headerActions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
+/* ---- Botón de exportar ---- */
 
 .secondaryButton {
   display: inline-flex;

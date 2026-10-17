@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router'
 import { useAppDispatch } from '../../app/hooks'
 import { Logo } from '../../components/Logo'
-import { CloseIcon, HistoryIcon, LayersIcon, MenuIcon } from '../../components/icons'
+import { BarChartIcon, CloseIcon, HistoryIcon, LayersIcon, MenuIcon } from '../../components/icons'
 import { AccountControls } from '../account/AccountControls'
 import { fetchAssets } from '../assets/assetsSlice'
 import { PortfolioNav } from '../portfolios/PortfolioNav'
@@ -67,6 +67,9 @@ export function AppLayout() {
         <nav className={styles.nav} aria-label="Principal">
           <NavLink to="/transactions" className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}>
             <HistoryIcon /> Historial de Transacciones
+          </NavLink>
+          <NavLink to="/analysis" className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}>
+            <BarChartIcon /> Análisis
           </NavLink>
           <NavLink to="/" end className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}>
             <LayersIcon /> Todos los Portafolios

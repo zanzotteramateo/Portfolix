@@ -1,10 +1,14 @@
 import { useMemo, useState } from 'react'
 import type { AssetType, Currency, HoldingResponse } from '../../api/types'
 import { AssetIcon, TypeBadge } from '../../components/AssetBadges'
+import { Chip, ChipDivider, ChipGroup } from '../../components/Chips'
+import { Pill } from '../../components/Pill'
 import { TYPE_PLURALS } from '../../format/assetTypes'
 import { LineChart } from '../../components/charts/LineChart'
 import { formatAgo, tone, toNumber } from '../../format/format'
 import { useFormat } from '../../format/useFormat'
+import table from '../../styles/table.module.css'
+import tones from '../../styles/tones.module.css'
 import styles from './Dashboard.module.css'
 
 type TypeFilter = AssetType | 'ALL'
@@ -52,57 +56,50 @@ export function HoldingsTable({ holdings, currency, pricesUpdatedAt, onSelect }:
   return (
     <section aria-label="Activos">
       <div className={styles.toolbar}>
-        <div className={styles.chips} role="group" aria-label="Filtrar por tipo">
+        <ChipGroup label="Filtrar y ordenar">
           {FILTERS.map((f) => (
-            <button
-              key={f.value}
-              type="button"
-              className={`${styles.chip} ${filter === f.value ? styles.chipActive : ''}`}
-              aria-pressed={filter === f.value}
-              onClick={() => setFilter(f.value)}
-            >
+            <Chip key={f.value} active={filter === f.value} onClick={() => setFilter(f.value)}>
               {f.label}
-            </button>
+            </Chip>
           ))}
-          <span className={styles.chipDivider} aria-hidden="true" />
+          <ChipDivider />
+          {/* "Mayor capital" es el orden de siempre: no se resalta, y elegir otro orden dos veces vuelve a él. */}
           {SORTS.map((s) => (
-            <button
+            <Chip
               key={s.value}
-              type="button"
-              className={`${styles.chip} ${sort === s.value && s.value !== 'capital' ? styles.chipActive : ''}`}
-              aria-pressed={sort === s.value}
+              active={sort === s.value && s.value !== 'capital'}
               onClick={() => setSort(sort === s.value ? 'capital' : s.value)}
             >
               {s.label}
-            </button>
+            </Chip>
           ))}
-        </div>
+        </ChipGroup>
         <p className={styles.toolbarInfo}>
           {rows.length === 1 ? '1 activo' : `${rows.length} activos`} · clic en fila para detalles
           {pricesUpdatedAt && <> · precios de {formatAgo(pricesUpdatedAt)}</>}
         </p>
       </div>
 
-      <div className={styles.tableWrapper}>
-        <table className={styles.table}>
+      <div className={table.wrapper}>
+        <table className={table.table}>
           <thead>
             <tr>
               <th scope="col">Símbolo</th>
               <th scope="col">Nombre</th>
               <th scope="col">Tipo</th>
-              <th scope="col" className={styles.numeric}>Capital invertido</th>
-              <th scope="col" className={styles.numeric}>Precio prom.</th>
+              <th scope="col" className={table.numeric}>Capital invertido</th>
+              <th scope="col" className={table.numeric}>Precio prom.</th>
               <th scope="col" className={styles.chartColumn}>Gráfico (7D)</th>
-              <th scope="col" className={`${styles.numeric} ${sortedBy === 'pnl' ? styles.sortedColumn : ''}`}>P&amp;L</th>
-              <th scope="col" className={styles.numeric}>Cantidad</th>
-              <th scope="col" className={`${styles.numeric} ${sortedBy === 'capital' ? styles.sortedColumn : ''}`}>
+              <th scope="col" className={`${table.numeric} ${sortedBy === 'pnl' ? table.sorted : ''}`}>P&amp;L</th>
+              <th scope="col" className={table.numeric}>Cantidad</th>
+              <th scope="col" className={`${table.numeric} ${sortedBy === 'capital' ? table.sorted : ''}`}>
                 Capital actual
               </th>
             </tr>
           </thead>
           <tbody>
             {rows.map((h) => (
-              <tr key={h.symbol} className={styles.row} onClick={() => onSelect(h.symbol)}>
+              <tr key={h.symbol} className={table.clickable} onClick={() => onSelect(h.symbol)}>
                 <td>
                   {/* El botón hace la fila accesible con el teclado; el clic en cualquier lado de la fila también abre. */}
                   <button type="button" className={styles.symbolButton} aria-label={`Ver el detalle de ${h.symbol}`}>
@@ -114,26 +111,24 @@ export function HoldingsTable({ holdings, currency, pricesUpdatedAt, onSelect }:
                 <td>
                   <TypeBadge type={h.type} />
                 </td>
-                <td className={styles.numeric}>{format.money(h.investedCapital, currency)}</td>
-                <td className={`${styles.numeric} ${styles.muted}`}>
+                <td className={table.numeric}>{format.money(h.investedCapital, currency)}</td>
+                <td className={`${table.numeric} ${table.muted}`}>
                   {h.averagePrice === null ? '—' : format.price(h.averagePrice, currency)}
                 </td>
                 <td className={styles.chartColumn}>
                   <Sparkline holding={h} />
                 </td>
-                <td className={styles.numeric}>
+                <td className={table.numeric}>
                   {h.pnlPercent === null ? (
                     '—'
                   ) : (
-                    <span className={`${styles.pill} ${styles[tone(h.pnlPercent)]}`}>
-                      {format.percent(h.pnlPercent, { sign: true })}
-                    </span>
+                    <Pill tone={tone(h.pnlPercent)}>{format.percent(h.pnlPercent, { sign: true })}</Pill>
                   )}
                 </td>
-                <td className={`${styles.numeric} ${styles.muted}`}>{format.quantity(h.quantity, h.type)}</td>
-                <td className={styles.numeric}>
+                <td className={`${table.numeric} ${table.muted}`}>{format.quantity(h.quantity, h.type)}</td>
+                <td className={table.numeric}>
                   <span className={styles.currentValue}>{format.money(h.currentValue, currency)}</span>
-                  <span className={`${styles.subValue} ${styles[tone(h.pnl)]}`}>
+                  <span className={`${styles.subValue} ${tones[tone(h.pnl)]}`}>
                     {format.money(h.pnl, currency, { sign: true })}
                   </span>
                 </td>
@@ -158,7 +153,7 @@ function Sparkline({ holding }: { holding: HoldingResponse }) {
   return (
     <span className={styles.sparkline}>
       <LineChart values={holding.sparkline7d.map(Number)} color={color} height={24} label={`Precio de ${holding.symbol} en 7 días`} />
-      <span className={styles[trend]}>{format.percent(holding.change7dPercent, { sign: true })}</span>
+      <span className={tones[trend]}>{format.percent(holding.change7dPercent, { sign: true })}</span>
     </span>
   )
 }

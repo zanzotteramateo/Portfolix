@@ -195,7 +195,7 @@
 .saveButton {
   background: var(--accent-strong);
   border: none;
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .cancelButton {

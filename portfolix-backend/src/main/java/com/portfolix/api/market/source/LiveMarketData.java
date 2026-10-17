@@ -1,4 +1,4 @@
-package com.portfolix.api.market;
+package com.portfolix.api.market.source;
 
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -8,6 +8,11 @@ import com.portfolix.api.asset.Asset;
 import com.portfolix.api.asset.AssetService;
 import com.portfolix.api.asset.AssetType;
 import com.portfolix.api.common.exception.ServiceUnavailableException;
+import com.portfolix.api.market.FxQuote;
+import com.portfolix.api.market.FxRateProvider;
+import com.portfolix.api.market.FxRateType;
+import com.portfolix.api.market.PriceProvider;
+import com.portfolix.api.market.PriceQuote;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

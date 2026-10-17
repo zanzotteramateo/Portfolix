@@ -1,0 +1,110 @@
+.chart {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  touch-action: pan-y; /* en el celular, deslizar de costado recorre el gráfico; para arriba y abajo, la página */
+  border-radius: var(--radius);
+}
+
+.chart:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.chart svg {
+  display: block;
+}
+
+.grid {
+  stroke: var(--border-subtle);
+  stroke-width: 1;
+}
+
+.axisY,
+.axisX {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  fill: var(--text-muted);
+}
+
+.axisY {
+  text-anchor: end;
+  dominant-baseline: middle;
+}
+
+.valueLine,
+.netLine {
+  fill: none;
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.valueLine {
+  stroke: var(--accent);
+}
+
+.netLine {
+  stroke: var(--text-muted);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+}
+
+.cursor {
+  stroke: var(--border-default);
+  stroke-width: 1;
+}
+
+.valueDot {
+  fill: var(--accent);
+  stroke: var(--surface-1);
+  stroke-width: 2;
+}
+
+.netDot {
+  fill: var(--text-muted);
+  stroke: var(--surface-1);
+  stroke-width: 2;
+}
+
+/* ---- Detalle del día ---- */
+
+.tooltip {
+  position: absolute;
+  top: 8px;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 190px;
+  padding: 10px 12px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  font-size: 12px;
+  pointer-events: none;
+}
+
+.tooltipDate {
+  font-weight: 600;
+}
+
+.tooltipRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--text-muted);
+}
+
+.tooltipRow span:last-child {
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+.tooltipRow.gain span:last-child {
+  color: var(--status-gain);
+}
+
+.tooltipRow.loss span:last-child {
+  color: var(--status-loss);
+}

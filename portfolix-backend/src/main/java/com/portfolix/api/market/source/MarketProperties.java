@@ -1,5 +1,6 @@
-package com.portfolix.api.market;
+package com.portfolix.api.market.source;
 
+import com.portfolix.api.market.FxRateType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -49,7 +50,8 @@ public record MarketProperties(
             @NotBlank String dolarApi,
             @NotBlank String argentinaDatos,
             @NotBlank String coinGecko,
-            @NotBlank String data912
+            @NotBlank String data912,
+            @NotBlank String coinbase
     ) {
     }
 

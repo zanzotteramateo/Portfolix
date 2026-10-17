@@ -109,6 +109,20 @@ export function formatDate(isoDate: string): string {
   return `${day}/${month}/${year}`
 }
 
+const MONTHS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
+
+/** Para los ejes de los gráficos: "2026-10-16" → "16/10". */
+export function formatDayMonth(isoDate: string): string {
+  const [, month, day] = isoDate.split('-')
+  return `${day}/${month}`
+}
+
+/** Para los ejes de los gráficos: "2026-10-16" → "oct '26". */
+export function formatMonthYear(isoDate: string): string {
+  const [year, month] = isoDate.split('-')
+  return `${MONTHS[Number(month) - 1]} '${year.slice(2)}`
+}
+
 /** Hace cuánto: "hace un momento", "hace 3 min", "hace 2 h". */
 export function formatAgo(isoInstant: string, now = Date.now()): string {
   const minutes = Math.floor((now - new Date(isoInstant).getTime()) / 60000)

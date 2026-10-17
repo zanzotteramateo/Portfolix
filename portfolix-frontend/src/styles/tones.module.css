@@ -1,0 +1,16 @@
+/*
+ * El color de un número según su signo: verde ganancia, rojo pérdida, gris cero.
+ * Se usa con tone() de format.ts: className={tones[tone(valor)]}.
+ */
+
+.gain {
+  color: var(--status-gain);
+}
+
+.loss {
+  color: var(--status-loss);
+}
+
+.neutral {
+  color: var(--text-muted);
+}

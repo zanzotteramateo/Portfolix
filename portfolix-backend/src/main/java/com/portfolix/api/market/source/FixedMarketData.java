@@ -1,6 +1,16 @@
-package com.portfolix.api.market;
+package com.portfolix.api.market.source;
 
 import com.portfolix.api.asset.Asset;
+import com.portfolix.api.market.ClosesRequest;
+import com.portfolix.api.market.DailyCloses;
+import com.portfolix.api.market.FxQuote;
+import com.portfolix.api.market.FxRateProvider;
+import com.portfolix.api.market.HistoryRange;
+import com.portfolix.api.market.PriceHistory;
+import com.portfolix.api.market.PriceHistoryProvider;
+import com.portfolix.api.market.PricePoint;
+import com.portfolix.api.market.PriceProvider;
+import com.portfolix.api.market.PriceQuote;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -8,6 +18,7 @@ import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -45,6 +56,16 @@ public class FixedMarketData implements PriceProvider, FxRateProvider, PriceHist
     @Override
     public Optional<PriceHistory> cachedHistory(Asset asset, HistoryRange range) {
         return Optional.of(history(asset, range));
+    }
+
+    /** También planos: el precio fijo en cualquier fecha. */
+    @Override
+    public Map<String, DailyCloses> dailyCloses(Collection<ClosesRequest> requests) {
+        Map<String, DailyCloses> closes = new HashMap<>();
+        for (ClosesRequest request : requests) {
+            closes.put(request.asset().getSymbol(), DailyCloses.constant(quote(request.asset()).price()));
+        }
+        return closes;
     }
 
     @Override

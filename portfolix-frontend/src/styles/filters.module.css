@@ -1,0 +1,52 @@
+/*
+ * Los campos de los filtros (portafolio, activo, fechas) del historial y del análisis: una etiqueta chica arriba,
+ * el selector o la fecha, y el error del backend debajo.
+ */
+
+.row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 160px;
+}
+
+.label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.control {
+  height: 34px;
+  padding: 0 10px;
+  background: var(--bg-base);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 13px;
+}
+
+.control:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.invalid {
+  border-color: var(--status-loss);
+}
+
+.error {
+  margin: 0;
+  font-size: 12px;
+  color: var(--status-loss);
+}

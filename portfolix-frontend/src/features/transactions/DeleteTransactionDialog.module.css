@@ -11,7 +11,7 @@
 
 .danger {
   background: var(--danger-strong);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .danger:hover:not(:disabled) {

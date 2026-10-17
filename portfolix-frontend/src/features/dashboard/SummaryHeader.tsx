@@ -1,8 +1,10 @@
 import type { AssetType, DashboardSummaryResponse } from '../../api/types'
 import { TYPE_COLORS, TYPE_PLURALS } from '../../format/assetTypes'
 import { Donut } from '../../components/charts/Donut'
+import { Pill } from '../../components/Pill'
 import { tone, toNumber } from '../../format/format'
 import { useFormat } from '../../format/useFormat'
+import tones from '../../styles/tones.module.css'
 import styles from './Dashboard.module.css'
 
 /** El orden de la leyenda del diseño. */
@@ -32,15 +34,13 @@ export function SummaryHeader({ summary }: { summary: DashboardSummaryResponse }
             </span>
           )}
         </p>
-        <span className={`${styles.pill} ${styles[tone(summary.totalPnlPercent)]}`}>
-          {format.percent(summary.totalPnlPercent ?? 0, { sign: true })}
-        </span>
+        <Pill tone={tone(summary.totalPnlPercent)}>{format.percent(summary.totalPnlPercent ?? 0, { sign: true })}</Pill>
       </div>
 
       <dl className={styles.stats}>
         <div>
           <dt>Ganancia total</dt>
-          <dd className={styles[tone(summary.totalPnl)]}>
+          <dd className={tones[tone(summary.totalPnl)]}>
             {summary.holdingsCount === 0 && toNumber(summary.totalPnl) === 0 ? '—' : format.money(summary.totalPnl, currency, { sign: true })}
           </dd>
         </div>

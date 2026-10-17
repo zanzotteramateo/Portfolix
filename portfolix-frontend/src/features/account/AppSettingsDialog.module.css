@@ -59,7 +59,7 @@
   left: 2px;
   width: 18px;
   height: 18px;
-  background: #fff;
+  background: var(--on-accent);
   border-radius: 50%;
   transition: transform 0.15s;
 }

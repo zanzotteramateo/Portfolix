@@ -1,6 +1,10 @@
-package com.portfolix.api.market;
+package com.portfolix.api.market.source;
 
 import com.portfolix.api.asset.Asset;
+import com.portfolix.api.market.HistoryRange;
+import com.portfolix.api.market.PriceHistory;
+import com.portfolix.api.market.PricePoint;
+import com.portfolix.api.market.PriceQuote;
 
 import java.math.BigDecimal;
 import java.time.Instant;

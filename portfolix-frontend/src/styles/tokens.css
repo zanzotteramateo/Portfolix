@@ -31,6 +31,7 @@
   /* Derivados: no son variables de Figma. */
   --accent-strong: #1f6feb; /* fondo de los botones principales: con texto blanco se lee bien */
   --accent-strong-hover: #1158c7;
+  --on-accent: #fff; /* texto e íconos sobre los fondos fuertes (botones principales, de borrar, avatar) */
   --danger-strong: #cf222e; /* fondo de los botones de borrar y de vender */
   --avatar-from: #8250df; /* el degradado del avatar va de este violeta a --accent-strong */
   --status-warning: #9a6700; /* fuerza de contraseña intermedia */
@@ -59,6 +60,7 @@
 
   --accent-strong: #1f6feb;
   --accent-strong-hover: #388bfd;
+  --on-accent: #fff;
   --danger-strong: #da3633;
   --avatar-from: #8957e5;
   --status-warning: #d29922;

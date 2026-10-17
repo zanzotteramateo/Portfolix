@@ -1,10 +1,13 @@
-package com.portfolix.api.market;
+package com.portfolix.api.market.source;
 
 import com.portfolix.api.asset.Asset;
 import com.portfolix.api.asset.AssetService;
 import com.portfolix.api.asset.AssetType;
 import com.portfolix.api.common.Currency;
 import com.portfolix.api.common.exception.ServiceUnavailableException;
+import com.portfolix.api.market.FxQuote;
+import com.portfolix.api.market.FxRateType;
+import com.portfolix.api.market.PriceQuote;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.client.ResourceAccessException;
@@ -60,7 +63,8 @@ class LiveMarketDataTest {
                 FxRateType.BLUE,
                 new MarketProperties.Refresh(PRICES_REFRESH, Duration.ofMinutes(15), Duration.ofHours(12),
                         Duration.ofMinutes(5), Duration.ofMinutes(15), Duration.ofHours(6)),
-                new MarketProperties.Sources("https://a.test", "https://b.test", "https://c.test", "https://d.test"),
+                new MarketProperties.Sources("https://a.test", "https://b.test", "https://c.test", "https://d.test",
+                        "https://e.test"),
                 new MarketProperties.Fixed(BigDecimal.ONE, Map.of()));
         market = new LiveMarketData(dolarApi, argentinaDatos, coinGecko, data912, assetService, properties,
                 Clock.fixed(NOW, ZoneOffset.UTC), nanos::get, Runnable::run);

@@ -20,7 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 		"portfolix.market.sources.dolar-api=http://localhost:1",
 		"portfolix.market.sources.argentina-datos=http://localhost:1",
 		"portfolix.market.sources.coin-gecko=http://localhost:1",
-		"portfolix.market.sources.data912=http://localhost:1"
+		"portfolix.market.sources.data912=http://localhost:1",
+		"portfolix.market.sources.coinbase=http://localhost:1"
 })
 class PortfolixBackendApplicationTests {
 

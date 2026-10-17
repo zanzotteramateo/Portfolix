@@ -106,6 +106,16 @@ export const ChartIcon = (props: IconProps) => (
   </Icon>
 )
 
+/** Barras: el análisis (el ícono de línea ya lo usa el logo). */
+export const BarChartIcon = (props: IconProps) => (
+  <Icon {...props}>
+    <path d="M3 21h18" />
+    <path d="M7 17v-5" />
+    <path d="M12 17V7" />
+    <path d="M17 17v-8" />
+  </Icon>
+)
+
 export const HistoryIcon = (props: IconProps) => (
   <Icon {...props}>
     <circle cx="12" cy="12" r="9" />
